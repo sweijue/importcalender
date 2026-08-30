@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>行程批次匯入 Apple 行事曆</title>
+<style>
+  :root {
+    --bg: #f5f5f4;
+    --card: #ffffff;
+    --border: #dcdcd8;
+    --text: #1c1c1a;
+    --text-secondary: #6b6b66;
+    --accent: #185fa5;
+    --danger: #a32d2d;
+    --success: #3b6d11;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 24px 16px 60px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+  .subtitle { color: var(--text-secondary); font-size: 14px; margin: 0 0 20px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  label { font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 6px; }
+  textarea {
+    width: 100%;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: #fafaf9;
+    resize: vertical;
+    min-height: 200px;
+  }
+  input[type="number"], input[type="text"] {
+    font-size: 14px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: #fafaf9;
+    width: 100px;
+  }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .help {
+    background: #f0efe9;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+  }
+  .help b { color: var(--text); font-weight: 600; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    background: #eae9e3;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+  button {
+    background: var(--accent);
+    color: white;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 12px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 16px;
+  }
+  button:active { opacity: 0.85; }
+  #status { font-size: 13px; min-height: 20px; margin-top: 10px; }
+  .status-ok { color: var(--success); }
+  .status-err { color: var(--danger); }
+  #list { display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; margin-top: 10px; }
+  .ev-row { background: #fafaf9; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 13px; }
+  .ev-title { font-weight: 600; }
+  .ev-meta { color: var(--text-secondary); margin-top: 2px; font-size: 12.5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>行程批次匯入 Apple 行事曆</h1>
+  <p class="subtitle">貼上文字 → 產生 .ics 檔案 → 用「檔案」App 或雙擊開啟即可一次匯入，含提醒設定。此頁面完全離線運作，資料不會上傳。</p>
+
+  <div class="card">
+    <label for="input">貼上行程文字</label>
+    <textarea id="input" placeholder="十二堂課 @15,1d
+* 9/6（日）10:00
+* 9/13（日）10:00
+* 9/20（日）10:00
+
+2026-09-01 09:00-10:00 團隊會議
+2026-09-02 全天 出差台中 @0"></textarea>
+  </div>
+
+  <div class="card help">
+    <b>自動偵測日期時間</b>：不管標題在前在後、用 <code>｜</code>、空格、或緊貼括號都會自動拆解，例如：<br>
+    <code>2026-09-01 09:00-10:00 團隊會議</code><br>
+    <code>第一堂 ｜ 9/6（日）09:30</code><br>
+    <code>9/6（日）09:30 上課</code>
+    <br><br>
+    <b>群組標題</b>：標題行（可加提醒）+ 多行 <code>*</code> 開頭只寫日期時間，共用同一標題<br>
+    例：<code>十二堂課 @15,1d</code> 接著 <code>* 9/6（日）10:00</code>
+    <br><br>
+    <b>提醒寫法</b>：逗號分隔可設多個。<code>15</code>=分鐘前　<code>2h</code>=小時前　<code>1d</code>=天前，行末加 <code>@15,1d</code> 可覆蓋該行提醒，<code>@0</code>=不提醒</div>
+
+  <div class="card">
+    <div class="row">
+      <div class="field">
+        <label for="year">年份（無年份日期用）</label>
+        <input id="year" type="number" value="2026">
+      </div>
+      <div class="field">
+        <label for="duration">預設時長（分鐘）</label>
+        <input id="duration" type="number" value="60" min="5" step="5">
+      </div>
+      <div class="field">
+        <label for="reminder">預設提醒（可逗號分隔，如 15,1d）</label>
+        <input id="reminder" type="text" value="15">
+      </div>
+    </div>
+    <button id="parseBtn">產生並下載 .ics 檔案</button>
+    <div id="status"></div>
+  </div>
+
+  <div class="card" id="preview" style="display:none;">
+    <p style="font-size:13px; color:var(--text-secondary); margin:0 0 8px;">已解析 <span id="count">0</span> 筆行程</p>
+    <div id="list"></div>
+  </div>
+</div>
+
+<script>
+function pad(n){ return String(n).padStart(2,'0'); }
+function fmtICS(d){
+  return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T'+pad(d.getHours())+pad(d.getMinutes())+'00';
+}
+function fmtICSDate(d){
+  return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate());
+}
+function escapeText(s){
+  return s.replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,');
+}
+function parseReminderToken(tok){
+  tok = tok.trim();
+  let m = tok.match(/^(\d+)d$/i);
+  if(m) return parseInt(m[1],10) * 1440;
+  m = tok.match(/^(\d+)h$/i);
+  if(m) return parseInt(m[1],10) * 60;
+  m = tok.match(/^(\d+)$/);
+  if(m) return parseInt(m[1],10);
+  return null;
+}
+function parseReminders(str){
+  if(str === undefined || str === null) return [];
+  const parts = String(str).split(',').map(s => s.trim()).filter(s => s.length > 0);
+  const result = [];
+  parts.forEach(p => {
+    const v = parseReminderToken(p);
+    if(v !== null) result.push(v);
+  });
+  return result;
+}
+
+document.getElementById('parseBtn').addEventListener('click', function(){
+  const raw = document.getElementById('input').value;
+  const defaultReminders = parseReminders(document.getElementById('reminder').value);
+  const defaultDuration = parseInt(document.getElementById('duration').value, 10);
+  const defaultYear = parseInt(document.getElementById('year').value, 10);
+  const statusEl = document.getElementById('status');
+  const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+  if(lines.length === 0){
+    statusEl.textContent = '請先貼上至少一行行程。';
+    statusEl.className = 'status-err';
+    return;
+  }
+
+  const events = [];
+  const errors = [];
+  let currentTitle = null;
+  let currentReminders = defaultReminders;
+
+  const bulletMarkerRe = /^[*\-•]\s*/;
+  const dtRe = /(\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2})\s*(?:[（(][^）)]*[）)])?\s*(全天|\d{1,2}:\d{2}(?:-\d{1,2}:\d{2})?)/;
+
+  lines.forEach((line, idx) => {
+    let isBullet = false;
+    let content = line;
+    if(bulletMarkerRe.test(content)){
+      isBullet = true;
+      content = content.replace(bulletMarkerRe, '');
+    }
+
+    let reminderOverride = null;
+    const remMatch = content.match(/@([\d,hHdD]+)\s*$/);
+    if(remMatch){
+      reminderOverride = remMatch[1];
+      content = content.slice(0, remMatch.index).trim();
+    }
+
+    const dtMatch = content.match(dtRe);
+
+    if(!dtMatch){
+      if(isBullet){
+        errors.push('第 ' + (idx+1) + ' 行看起來是日期項目，但無法辨識日期時間：「' + line + '」');
+        return;
+      }
+      const headerText = content.trim();
+      if(headerText.length === 0){
+        errors.push('第 ' + (idx+1) + ' 行無法辨識：「' + line + '」');
+        return;
+      }
+      currentTitle = headerText;
+      currentReminders = reminderOverride !== null ? parseReminders(reminderOverride) : defaultReminders;
+      return;
+    }
+
+    const dateStr = dtMatch[1];
+    const timeStr = dtMatch[2];
+    const before = content.slice(0, dtMatch.index);
+    const after = content.slice(dtMatch.index + dtMatch[0].length);
+    const titleRaw = (before + ' ' + after).replace(/^[\s｜|\-–—:：]+|[\s｜|\-–—:：]+$/g, '').trim();
+
+    let y, mo, da;
+    if(dateStr.indexOf('-') !== -1){
+      [y, mo, da] = dateStr.split('-').map(Number);
+    } else {
+      [mo, da] = dateStr.split('/').map(Number);
+      y = defaultYear;
+    }
+
+    let title, reminders;
+    if(isBullet){
+      if(currentTitle === null){
+        errors.push('第 ' + (idx+1) + ' 行是日期項目，但前面沒有標題行：「' + line + '」');
+        return;
+      }
+      title = currentTitle;
+      reminders = reminderOverride !== null ? parseReminders(reminderOverride) : currentReminders;
+    } else if(titleRaw.length === 0){
+      if(currentTitle === null){
+        errors.push('第 ' + (idx+1) + ' 行缺少標題，且沒有前一行標題可用：「' + line + '」');
+        return;
+      }
+      title = currentTitle;
+      reminders = reminderOverride !== null ? parseReminders(reminderOverride) : currentReminders;
+    } else {
+      title = titleRaw;
+      reminders = reminderOverride !== null ? parseReminders(reminderOverride) : defaultReminders;
+      currentTitle = null;
+    }
+
+    let start, end, allDay = false;
+    if(timeStr === '全天'){
+      allDay = true;
+      start = new Date(y, mo-1, da);
+      end = new Date(y, mo-1, da+1);
+    } else {
+      const [startStr, endStr] = timeStr.split('-');
+      const [sh, sm] = startStr.split(':').map(Number);
+      start = new Date(y, mo-1, da, sh, sm);
+      if(endStr){
+        const [eh, em] = endStr.split(':').map(Number);
+        end = new Date(y, mo-1, da, eh, em);
+      } else {
+        end = new Date(start.getTime() + defaultDuration*60000);
+      }
+    }
+
+    events.push({ title, allDay, start, end, reminders });
+  });
+
+  if(errors.length > 0){
+    statusEl.innerHTML = errors.join('<br>');
+    statusEl.className = 'status-err';
+    if(events.length === 0) return;
+  }
+
+  let ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//local-batch-import//zh-TW\r\nCALSCALE:GREGORIAN\r\n';
+  const now = new Date();
+  events.forEach((ev, i) => {
+    ics += 'BEGIN:VEVENT\r\n';
+    ics += 'UID:' + now.getTime() + '-' + i + '@local-batch-import\r\n';
+    ics += 'DTSTAMP:' + fmtICS(now) + '\r\n';
+    if(ev.allDay){
+      ics += 'DTSTART;VALUE=DATE:' + fmtICSDate(ev.start) + '\r\n';
+      ics += 'DTEND;VALUE=DATE:' + fmtICSDate(ev.end) + '\r\n';
+    } else {
+      ics += 'DTSTART:' + fmtICS(ev.start) + '\r\n';
+      ics += 'DTEND:' + fmtICS(ev.end) + '\r\n';
+    }
+    ics += 'SUMMARY:' + escapeText(ev.title) + '\r\n';
+    (ev.reminders || []).forEach(r => {
+      if(r > 0){
+        ics += 'BEGIN:VALARM\r\n';
+        ics += 'ACTION:DISPLAY\r\n';
+        ics += 'DESCRIPTION:' + escapeText(ev.title) + '\r\n';
+        ics += 'TRIGGER:-PT' + r + 'M\r\n';
+        ics += 'END:VALARM\r\n';
+      }
+    });
+    ics += 'END:VEVENT\r\n';
+  });
+  ics += 'END:VCALENDAR\r\n';
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+  if(isIOS){
+    const dataUrl = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
+    window.location.href = dataUrl;
+  } else {
+    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'events.ics';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  if(errors.length === 0){
+    statusEl.textContent = isIOS
+      ? '已產生 ' + events.length + ' 筆行程，請在跳出的畫面中確認加入行事曆。'
+      : '已產生並下載 events.ics，共 ' + events.length + ' 筆行程，點擊下載的檔案即可加入行事曆。';
+    statusEl.className = 'status-ok';
+  } else {
+    statusEl.innerHTML += '<br>其餘 ' + events.length + ' 筆已成功解析。';
+  }
+
+  const preview = document.getElementById('preview');
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+  document.getElementById('count').textContent = events.length;
+  events.forEach(ev => {
+    const row = document.createElement('div');
+    row.className = 'ev-row';
+    const dateLabel = ev.allDay
+      ? ev.start.getFullYear()+'-'+pad(ev.start.getMonth()+1)+'-'+pad(ev.start.getDate())+'（全天）'
+      : ev.start.getFullYear()+'-'+pad(ev.start.getMonth()+1)+'-'+pad(ev.start.getDate())+' '+pad(ev.start.getHours())+':'+pad(ev.start.getMinutes())+'-'+pad(ev.end.getHours())+':'+pad(ev.end.getMinutes());
+    const remLabel = (ev.reminders && ev.reminders.length > 0)
+      ? ev.reminders.map(r => r % 1440 === 0 ? (r/1440)+'天前' : (r % 60 === 0 ? (r/60)+'小時前' : r+'分鐘前')).join('、')
+      : '無提醒';
+    row.innerHTML = '<div class="ev-title">'+ev.title+'</div><div class="ev-meta">'+dateLabel+' · 提醒：'+remLabel+'</div>';
+    list.appendChild(row);
+  });
+  preview.style.display = 'block';
+});
+</script>
+</body>
+</html>
