@@ -92,12 +92,24 @@
   .ev-row { background: #fafaf9; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 13px; }
   .ev-title { font-weight: 600; }
   .ev-meta { color: var(--text-secondary); margin-top: 2px; font-size: 12.5px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    border: 1px solid var(--border);
+    background: #fafaf9;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .chip.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>行程批次匯入 Apple 行事曆</h1>
-  <p class="subtitle">貼上文字 → 產生 .ics 檔案 → 用「檔案」App 或雙擊開啟即可一次匯入，含提醒設定。此頁面完全離線運作，資料不會上傳。</p>
+  <p class="subtitle">此頁面完全離線運作，資料不會上傳。</p>
 
   <div class="card">
     <label for="input">貼上行程文字</label>
@@ -111,32 +123,34 @@
   </div>
 
   <div class="card help">
-    <b>自動偵測日期時間</b>：不管標題在前在後、用 <code>｜</code>、空格、或緊貼括號都會自動拆解，例如：<br>
-    <code>2026-09-01 09:00-10:00 團隊會議</code><br>
-    <code>第一堂 ｜ 9/6（日）09:30</code><br>
-    <code>9/6（日）09:30 上課</code>
+    <b>在「檔案」App裡直接點開只會預覽，沒有加入按鈕</b>，若遇到這種情況請改成用「郵件」手動附加該檔案寄出再開啟。
     <br><br>
-    <b>群組標題</b>：標題行（可加提醒）+ 多行 <code>*</code> 開頭只寫日期時間，共用同一標題<br>
-    例：<code>十二堂課 @15,1d</code> 接著 <code>* 9/6（日）10:00</code>
+    <b>行程文字自動偵測日期時間</b>，標題在前在後、用 <code>｜</code>、空格、或緊貼括號皆可，例如：<br>
+    <code>2026-09-01 09:00-10:00 團隊會議</code>　<code>第一堂 ｜ 9/6（日）09:30</code>
     <br><br>
-    <b>提醒寫法</b>：逗號分隔可設多個。<code>15</code>=分鐘前　<code>2h</code>=小時前　<code>1d</code>=天前，行末加 <code>@15,1d</code> 可覆蓋該行提醒，<code>@0</code>=不提醒</div>
+    <b>群組標題</b>：標題行（可加 <code>@提醒</code>）+ 多行 <code>*</code> 開頭只寫日期時間，共用同一標題，例：<code>十二堂課 @15,1d</code> 接 <code>* 9/6（日）10:00</code>
+    <br><br>
+    行末加 <code>@15,1d</code> 可覆蓋該行提醒（逗號分隔，<code>15</code>=分鐘前、<code>2h</code>=小時前、<code>1d</code>=天前），<code>@0</code>=不提醒
+  </div>
 
   <div class="card">
-    <div class="row">
-      <div class="field">
-        <label for="year">年份（無年份日期用）</label>
-        <input id="year" type="number" value="2026">
-      </div>
-      <div class="field">
-        <label for="duration">預設時長（分鐘）</label>
-        <input id="duration" type="number" value="60" min="5" step="5">
-      </div>
-      <div class="field">
-        <label for="reminder">預設提醒（可逗號分隔，如 15,1d）</label>
-        <input id="reminder" type="text" value="15">
-      </div>
+    <div class="field" style="margin-bottom:14px;">
+      <label>年份（無年份日期用）</label>
+      <input id="year" type="number" value="2026" style="width:100px;">
     </div>
+
+    <div class="field" style="margin-bottom:14px;">
+      <label>預設時長</label>
+      <div class="chips" id="durationChipRow"></div>
+    </div>
+
+    <div class="field">
+      <label>預設提醒（最多選 2 個，跟 iPhone 行事曆一樣）</label>
+      <div class="chips" id="reminderChipRow"></div>
+    </div>
+
     <button id="parseBtn">產生並下載 .ics 檔案</button>
+    <p style="font-size:13px; font-weight:700; color:var(--text); margin:10px 0 0;">跳出分享清單請選「郵件」寄給自己，開信點附件才會跳出「加入全部」畫面完成匯入。</p>
     <div id="status"></div>
   </div>
 
@@ -177,11 +191,85 @@ function parseReminders(str){
   });
   return result;
 }
+function fmtMinutes(m){
+  if(m === 0) return '0';
+  if(m % 1440 === 0) return (m/1440) + 'd';
+  if(m % 60 === 0) return (m/60) + 'h';
+  return String(m);
+}
+
+// ---- iOS 風格快速選項（無輸入框，狀態存在記憶體中） ----
+const DURATION_OPTIONS = [15, 30, 45, 60, 90, 120, 180];
+const REMINDER_OPTIONS = [
+  { label: '準時', min: 0 },
+  { label: '5分鐘前', min: 5 },
+  { label: '10分鐘前', min: 10 },
+  { label: '15分鐘前', min: 15 },
+  { label: '30分鐘前', min: 30 },
+  { label: '1小時前', min: 60 },
+  { label: '2小時前', min: 120 },
+  { label: '1天前', min: 1440 },
+  { label: '2天前', min: 2880 },
+  { label: '1週前', min: 10080 }
+];
+
+let selectedDuration = 60;
+let selectedReminders = [60, 1440]; // 預設：1小時前 + 1天前
+
+const durationRow = document.getElementById('durationChipRow');
+const reminderRow = document.getElementById('reminderChipRow');
+
+DURATION_OPTIONS.forEach(min => {
+  const chip = document.createElement('div');
+  chip.className = 'chip';
+  chip.textContent = min < 60 ? min + '分' : (min % 60 === 0 ? (min/60) + '小時' : (min/60).toFixed(1) + '小時');
+  chip.dataset.min = min;
+  chip.addEventListener('click', () => {
+    selectedDuration = min;
+    syncDurationChips();
+  });
+  durationRow.appendChild(chip);
+});
+
+REMINDER_OPTIONS.forEach(opt => {
+  const chip = document.createElement('div');
+  chip.className = 'chip';
+  chip.textContent = opt.label;
+  chip.dataset.min = opt.min;
+  chip.addEventListener('click', () => {
+    const idx = selectedReminders.indexOf(opt.min);
+    if(idx >= 0){
+      selectedReminders.splice(idx, 1);
+    } else {
+      if(selectedReminders.length >= 2){
+        selectedReminders.shift(); // iPhone 行事曆最多只有「第一提醒」「第二提醒」兩個，選第3個時淘汰最舊的
+      }
+      selectedReminders.push(opt.min);
+    }
+    syncReminderChips();
+  });
+  reminderRow.appendChild(chip);
+});
+
+function syncDurationChips(){
+  Array.from(durationRow.children).forEach(chip => {
+    chip.classList.toggle('selected', parseInt(chip.dataset.min,10) === selectedDuration);
+  });
+}
+function syncReminderChips(){
+  Array.from(reminderRow.children).forEach(chip => {
+    chip.classList.toggle('selected', selectedReminders.indexOf(parseInt(chip.dataset.min,10)) !== -1);
+  });
+}
+syncDurationChips();
+syncReminderChips();
+// ---- 快速選項結束 ----
+
 
 document.getElementById('parseBtn').addEventListener('click', function(){
   const raw = document.getElementById('input').value;
-  const defaultReminders = parseReminders(document.getElementById('reminder').value);
-  const defaultDuration = parseInt(document.getElementById('duration').value, 10);
+  const defaultReminders = selectedReminders.slice();
+  const defaultDuration = selectedDuration;
   const defaultYear = parseInt(document.getElementById('year').value, 10);
   const statusEl = document.getElementById('status');
   const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
