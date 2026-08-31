@@ -321,30 +321,47 @@ document.getElementById('parseBtn').addEventListener('click', function(){
   ics += 'END:VCALENDAR\r\n';
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const filename = 'events.ics';
+  const file = new File([ics], filename, { type: 'text/calendar' });
 
-  if(isIOS){
-    const dataUrl = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
-    window.location.href = dataUrl;
-  } else {
-    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'events.ics';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  async function tryShare(){
+    if(navigator.canShare && navigator.canShare({ files: [file] })){
+      try {
+        await navigator.share({ files: [file], title: filename });
+        return true;
+      } catch(e){
+        return false;
+      }
+    }
+    return false;
   }
 
-  if(errors.length === 0){
-    statusEl.textContent = isIOS
-      ? '已產生 ' + events.length + ' 筆行程，請在跳出的畫面中確認加入行事曆。'
-      : '已產生並下載 events.ics，共 ' + events.length + ' 筆行程，點擊下載的檔案即可加入行事曆。';
-    statusEl.className = 'status-ok';
-  } else {
-    statusEl.innerHTML += '<br>其餘 ' + events.length + ' 筆已成功解析。';
-  }
+  tryShare().then(shared => {
+    if(shared){
+      statusEl.textContent = errors.length === 0
+        ? '已開啟分享選單，請選「郵件」或「行事曆」寄出／開啟（共 ' + events.length + ' 筆行程）。'
+        : '已開啟分享選單，其餘 ' + events.length + ' 筆已成功解析。';
+      statusEl.className = 'status-ok';
+    } else {
+      if(isIOS){
+        const dataUrl = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
+        window.location.href = dataUrl;
+        statusEl.textContent = '已產生 ' + events.length + ' 筆行程，請在跳出的畫面中確認加入行事曆。';
+      } else {
+        const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        statusEl.textContent = '已下載 ' + filename + '，共 ' + events.length + ' 筆行程，點擊下載的檔案即可加入行事曆。';
+      }
+      statusEl.className = 'status-ok';
+    }
+  });
 
   const preview = document.getElementById('preview');
   const list = document.getElementById('list');
