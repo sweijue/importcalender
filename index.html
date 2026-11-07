@@ -10,23 +10,24 @@
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;line-height:1.5;font-size:15px}
 button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.45}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #9ac4ff;outline-offset:2px}
 .wrap{width:min(100% - 32px,1020px);margin:0 auto;padding:28px 0 72px}.top{margin-bottom:18px}.eyebrow{font-size:12px;color:var(--blue);font-weight:700;letter-spacing:.08em;margin-bottom:7px}.top h1{font-size:clamp(22px,3.5vw,28px);line-height:1.25;margin:0 0 8px;font-weight:750}.subtitle{color:var(--muted);margin:0;font-size:13px}.version{display:inline-block;padding:3px 7px;border:1px solid var(--border);border-radius:6px;margin-left:8px;color:var(--muted);letter-spacing:0;font-weight:500}
-.card{background:var(--card);border:1px solid var(--border);border-radius:17px;padding:20px;box-shadow:var(--shadow);margin-bottom:15px}.card h2{font-size:17px;margin:0 0 14px}.card h3{font-size:14px;margin:0 0 10px}.mini{font-size:12px;color:var(--muted)}.label{font-size:13px;color:#455266;font-weight:650;display:block;margin:0 0 7px}.input,textarea,select{width:100%;background:#fff;border:1px solid #d7dfe8;border-radius:10px;padding:10px 11px;color:var(--text);min-height:43px}.input[type=time],.input[type=number],.input[type=date]{font-variant-numeric:tabular-nums}.input:focus,textarea:focus,select:focus{border-color:#7eacec}.field{min-width:0;flex:1}.field+.field{margin-top:0}.fields{display:flex;gap:12px}.field.small{flex:0 0 110px}.hint{font-size:12px;color:var(--muted);margin:7px 0 0}.help{font-size:13px;color:var(--muted);background:#f4f6f9;border-radius:10px;padding:11px 13px;margin:12px 0 0}.help code{background:#e6ebf2;border-radius:4px;padding:1px 4px;white-space:nowrap}
+.card{background:var(--card);border:1px solid var(--border);border-radius:17px;padding:20px;box-shadow:var(--shadow);margin-bottom:15px}.card h2{font-size:17px;margin:0 0 14px}.card h3{font-size:14px;margin:0 0 10px}.mini{font-size:12px;color:var(--muted)}.label{font-size:13px;color:#455266;font-weight:650;display:block;margin:0 0 7px}.input,textarea,select{width:100%;background:#fff;border:1px solid #d7dfe8;border-radius:10px;padding:10px 11px;color:var(--text);min-height:43px}.input[type=time],.input[type=number],.input[type=date]{font-variant-numeric:tabular-nums}.input:focus,textarea:focus,select:focus{border-color:#7eacec}.field{min-width:0;flex:1}.field+.field{margin-top:0}.fields{display:flex;gap:12px}.time-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.time-fields>.field,.date-row .row-times>label{min-width:0}.input[type="time"]{display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box}.field.small{flex:0 0 110px}.hint{font-size:12px;color:var(--muted);margin:7px 0 0}.help{font-size:13px;color:var(--muted);background:#f4f6f9;border-radius:10px;padding:11px 13px;margin:12px 0 0}.help code{background:#e6ebf2;border-radius:4px;padding:1px 4px;white-space:nowrap}
 .mode-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#e9edf3;border-radius:13px;padding:5px;margin-bottom:16px}.mode-tabs button{border:0;background:transparent;border-radius:10px;color:#526176;font-weight:700;padding:11px 7px}.mode-tabs button.active{color:var(--blue);background:#fff;box-shadow:0 1px 4px #2442681c}
 .content-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(310px,.85fr);gap:15px;align-items:start}.content-grid>.card{margin:0}.section-title{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}.section-title h2{margin:0}.tinybtn{border:1px solid var(--border);padding:6px 11px;background:#fff;color:var(--text);border-radius:8px;font-size:12px;font-weight:600}.tinybtn:hover{background:#f3f6fb}.danger-link{color:var(--red);border-color:#f2d9dc}.calendar-head{display:flex;align-items:center;gap:8px;justify-content:space-between;margin:14px 0}.calendar-head strong{font-size:17px;font-variant-numeric:tabular-nums}.month-controls{display:flex;gap:6px}.month-controls button{border:1px solid var(--border);background:#fff;width:37px;height:34px;border-radius:9px;font-weight:700}.month-controls .todaybtn{width:auto;padding:0 10px;font-size:12px}
 .calendar-week,.calendar-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.calendar-week{font-size:12px;text-align:center;color:var(--muted);margin-bottom:5px}.calendar-days button,.empty-cell{height:46px;border-radius:10px;display:grid;place-content:center;border:1px solid transparent;background:#f7f9fc;position:relative}.calendar-days button{color:var(--text);font-variant-numeric:tabular-nums}.calendar-days button:hover{border-color:#9fc4f7}.calendar-days button.today{border-color:#78a8e6}.calendar-days button.selected{color:#fff;background:var(--blue);border-color:var(--blue);font-weight:750}.calendar-days button.selected::after{content:"✓";font-size:10px;position:absolute;right:5px;top:2px}.empty-cell{background:transparent}
 .chips{display:flex;flex-wrap:wrap;gap:7px}.chip{padding:7px 11px;border-radius:999px;border:1px solid var(--border);background:#f8fafc;color:#45566c;font-size:12px;font-weight:600;min-height:35px}.chip.selected{background:var(--blue);border-color:var(--blue);color:white}.segmented{display:flex;gap:5px;background:#edf1f6;padding:4px;border-radius:11px}.segmented button{flex:1;border:0;border-radius:8px;background:transparent;padding:10px 6px;color:#536176;font-size:12.5px;font-weight:650}.segmented button.active{background:#fff;color:var(--blue);box-shadow:0 1px 3px #0000000d}.divider{border:0;border-top:1px solid var(--border);margin:17px 0}.control-stack{display:grid;gap:14px}.control-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.selected-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:15px 0 9px}.selected-header h3{margin:0}.selected-count{border-radius:99px;background:#e9f1ff;color:var(--blue);font-size:12px;padding:3px 9px;font-weight:750}.selected-list{display:grid;gap:8px;max-height:365px;overflow:auto}.date-row{border:1px solid var(--border);background:#fcfdff;border-radius:10px;padding:10px;display:grid;grid-template-columns:1fr auto;gap:9px;align-items:center}.date-row .row-title{font-size:13px;font-weight:700}.date-row .row-hint{font-size:12px;color:var(--muted);margin-top:2px}.date-row.editable{grid-template-columns:1fr auto}.date-row .row-times{display:grid;grid-template-columns:1fr 1fr;gap:8px;grid-column:1/-1}.date-row .row-times label{font-size:11px;color:var(--muted)}.date-row .row-times input{font-size:14px;min-height:38px;padding:6px}.date-row .remove{border:0;background:#f3f5f9;color:#8c4051;width:30px;height:30px;border-radius:8px}.empty-state{border:1px dashed var(--border);color:var(--muted);text-align:center;font-size:13px;border-radius:10px;padding:23px 12px}
+.selected-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:15px 0 9px}.selected-header h3{margin:0}.selected-count{border-radius:99px;background:#e9f1ff;color:var(--blue);font-size:12px;padding:3px 9px;font-weight:750}.selected-list{display:grid;gap:8px;max-height:365px;overflow:auto}.date-row{border:1px solid var(--border);background:#fcfdff;border-radius:10px;padding:10px;display:grid;grid-template-columns:1fr auto;gap:9px;align-items:center}.date-row .row-title{font-size:13px;font-weight:700}.date-row .row-hint{font-size:12px;color:var(--muted);margin-top:2px}.date-row.editable{grid-template-columns:1fr auto}.date-row .row-times{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;grid-column:1/-1}.date-row .row-times label{font-size:11px;color:var(--muted)}.date-row .row-times input{font-size:14px;min-height:38px;padding:6px}.date-row .remove{border:0;background:#f3f5f9;color:#8c4051;width:30px;height:30px;border-radius:8px}.empty-state{border:1px dashed var(--border);color:var(--muted);text-align:center;font-size:13px;border-radius:10px;padding:23px 12px}
 .numbering{display:flex;align-items:center;gap:9px;font-size:13px}.numbering input{width:17px;height:17px;accent-color:var(--blue)}.number-options{display:grid;grid-template-columns:1fr 100px;gap:10px;margin-top:11px}.number-options select{width:100%}.number-options input{width:100%}
 textarea{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;min-height:235px;resize:vertical}.text-help{line-height:1.85}.text-help summary{font-weight:700;cursor:pointer;color:#44556f}.text-help p{margin:8px 0 0}.text-help code{font-family:inherit}.text-meta{display:flex;gap:12px;margin-top:12px}.text-meta .field:first-child{flex:0 0 140px}
 .export-row{display:flex;gap:10px;margin-top:16px}.btn{border:0;border-radius:11px;background:var(--blue);color:white;padding:12px 16px;min-height:46px;font-weight:700}.btn.primary{flex:1}.btn.secondary{background:#e9f1fb;color:var(--blue);flex:0 0 auto}.btn:hover{filter:brightness(.98)}#status{font-size:12.5px;min-height:18px;margin-top:10px;white-space:pre-line}#status.err{color:var(--red)}#status.ok{color:var(--green)}#status.warn{color:#9b622a}.preview-header{display:flex;gap:8px;align-items:baseline;justify-content:space-between}.preview-header h2{margin:0}.preview-list{margin-top:12px;display:grid;gap:8px;max-height:370px;overflow:auto}.preview-item{border:1px solid var(--border);background:#fbfcfe;border-radius:10px;padding:11px 12px}.preview-item strong{font-size:13.5px;display:block;overflow-wrap:anywhere}.preview-item .meta{font-size:12px;color:var(--muted);margin-top:4px}.preview-summary{margin-top:8px;color:var(--muted);font-size:12px}.note{font-size:12.5px;color:var(--muted);margin:8px 0 0}.visually-hidden{position:absolute;width:1px;height:1px;clip:rect(0,0,0,0);overflow:hidden}.footer{text-align:center;color:var(--muted);font-size:12px;margin-top:16px}.hidden{display:none!important}
 @media(max-width:760px){.wrap{width:min(100% - 24px,580px);padding:18px 0 60px}.content-grid{grid-template-columns:minmax(0,1fr)}.card{padding:16px;border-radius:14px}.calendar-days button,.empty-cell{height:45px}.field.small{flex:0 0 95px}.date-row .row-times{grid-template-columns:1fr 1fr}.export-row{flex-wrap:wrap}.export-row .btn{flex:1;min-width:130px}.top h1{font-size:22px}}
+@media(max-width:480px){.time-fields,.date-row .row-times{grid-template-columns:minmax(0,1fr)}.time-fields{gap:12px}.time-fields .input[type="time"],.date-row .row-times .input[type="time"]{min-height:44px}}
 @media(max-width:360px){.calendar-days button,.empty-cell{height:39px}.calendar-week,.calendar-days{gap:3px}.card{padding:13px}.fields{gap:8px}}
 </style>
 </head>
 <body>
 <main class="wrap">
 <header class="top">
-  <div class="eyebrow">APPLE CALENDAR · 批次建立 <span class="version">v2.0.0</span></div>
+  <div class="eyebrow">APPLE CALENDAR · 批次建立 <span class="version">v2.0.1</span></div>
   <h1>行程批次匯入 Apple 行事曆</h1>
   <p class="subtitle">選日期、安排時間、自動編堂次，一次產生 .ics 行程。完全在瀏覽器離線處理，不會上傳資料。</p>
 </header>
@@ -81,13 +82,13 @@ textarea{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-s
       </div>
       <p class="hint" id="timeModeHint">所有選取日期使用同一組開始、結束時間。</p>
       <div id="commonTimeBlock" style="margin-top:14px">
-        <div class="fields"><div class="field"><label class="label" for="commonStart">開始時間</label><input class="input" id="commonStart" type="time" value="09:00"></div><div class="field"><label class="label" for="commonEnd">結束時間</label><input class="input" id="commonEnd" type="time" value="10:00"></div></div>
+        <div class="time-fields"><div class="field"><label class="label" for="commonStart">開始時間</label><input class="input" id="commonStart" type="time" value="09:00"></div><div class="field"><label class="label" for="commonEnd">結束時間</label><input class="input" id="commonEnd" type="time" value="10:00"></div></div>
         <div style="margin-top:13px"><label class="label">快速設定時長</label><div class="chips" id="durationChips"></div></div>
       </div>
       <hr class="divider">
       <h3>行程提醒（最多 2 個）</h3>
       <div id="reminderChips" class="chips"></div>
-      <p class="hint">預設：1 小時前＋1 天前。再次點選即可取消提醒。</p>
+      <p class="hint" id="reminderHint">首次使用預設：1 小時前＋1 天前。之後會記住此裝置瀏覽器上次選擇的提醒（最多 2 個）。</p>
       <div class="export-row"><button type="button" id="previewBtn" class="btn secondary">檢查預覽</button><button type="button" id="exportBtn" class="btn primary">產生 .ics 檔案</button></div>
       <div id="status" role="status" aria-live="polite"></div>
       <p class="note">iPhone 若只顯示檔案預覽，可透過分享選單的「郵件」寄給自己，再開啟信件附件，選「加入全部」。</p>
@@ -99,7 +100,7 @@ textarea{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-s
     </section>
   </div>
 </div>
-<p class="footer">行程批次匯入 Apple 行事曆 · v2.0.0 · 無需登入、無外部套件、資料不會上傳</p>
+<p class="footer">行程批次匯入 Apple 行事曆 · v2.0.1 · 無需登入、無外部套件、資料不會上傳</p>
 </main>
 <script>
 (() => {
@@ -114,6 +115,24 @@ let viewYear = now.getFullYear(), viewMonth = now.getMonth();
 let activeTab = 'calendar', timeMode = 'same', reminders = [60,1440], selectedDuration = 60;
 const durationOptions = [15,30,45,60,90,120,180];
 const reminderOptions = [{min:0,label:'準時'}, {min:5,label:'5分鐘前'}, {min:10,label:'10分鐘前'}, {min:15,label:'15分鐘前'}, {min:30,label:'30分鐘前'}, {min:60,label:'1小時前'}, {min:120,label:'2小時前'}, {min:1440,label:'1天前'}, {min:2880,label:'2天前'}, {min:10080,label:'1週前'}];
+// Save only reminder preferences, not the user's private calendar dates or event titles.
+const REMINDER_STORAGE_KEY = 'importcalender-reminders-v1';
+function restoreReminderPreferences(){
+  try{
+    const saved = localStorage.getItem(REMINDER_STORAGE_KEY);
+    if(saved === null) return;
+    const parsed = JSON.parse(saved);
+    const allowed = new Set(reminderOptions.map(opt => opt.min));
+    if(Array.isArray(parsed) && parsed.length <= 2 && parsed.every(n => Number.isInteger(n) && allowed.has(n)) && new Set(parsed).size === parsed.length){
+      reminders = parsed; // [] is meaningful: user explicitly disabled all reminders.
+    }
+  }catch(e){ /* private browsing and blocked storage keep default reminders */ }
+}
+function saveReminderPreferences(){
+  try{ localStorage.setItem(REMINDER_STORAGE_KEY, JSON.stringify(reminders)); }
+  catch(e){ /* still allow choosing reminders in the active page */ }
+}
+restoreReminderPreferences();
 $('defaultYear').value = String(now.getFullYear());
 const sortedDates = () => [...selectedDates.keys()].sort();
 const escapeHTML = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -184,7 +203,7 @@ function renderDurationChips(){const root=$('durationChips');root.replaceChildre
 });}
 function renderReminderChips(){const root=$('reminderChips');root.replaceChildren();reminderOptions.forEach(opt=>{
   const b=document.createElement('button');b.type='button';b.className='chip'+(reminders.includes(opt.min)?' selected':'');b.textContent=opt.label;b.setAttribute('aria-pressed',String(reminders.includes(opt.min)));
-  b.addEventListener('click',()=>{if(reminders.includes(opt.min))reminders=reminders.filter(n=>n!==opt.min);else{if(reminders.length===2)reminders.shift();reminders.push(opt.min);}renderReminderChips();invalidatePreview();});root.appendChild(b);
+  b.addEventListener('click',()=>{if(reminders.includes(opt.min))reminders=reminders.filter(n=>n!==opt.min);else{if(reminders.length===2)reminders.shift();reminders.push(opt.min);}saveReminderPreferences();renderReminderChips();invalidatePreview();});root.appendChild(b);
 });}
 function parseReminderToken(token){const m=String(token).trim().match(/^(\d+)([dh])?$/i);if(!m)return null;const v=Number(m[1])*(m[2]?.toLowerCase()==='d'?1440:m[2]?.toLowerCase()==='h'?60:1);return Number.isSafeInteger(v)&&v>=0?v:null;}
 function parseReminderOverride(str){if(String(str).trim()==='0')return [];const parts=String(str).split(',').filter(Boolean),nums=parts.map(parseReminderToken);if(!parts.length||nums.some(n=>n===null)||nums.length>2||nums.includes(0))return null;return [...new Set(nums)];}
@@ -289,7 +308,7 @@ function fold(line){const enc=new TextEncoder();const parts=[];let segment='',by
 }
 function makeICS(events){
   const stamp=icalStamp(new Date()),seed=`${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//importcalender v2.0//zh-TW','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//importcalender v2.0.1//zh-TW','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
   events.forEach((ev,i)=>{
     lines.push('BEGIN:VEVENT',`UID:${seed}-${i}@importcalender.local`,`DTSTAMP:${stamp}`);
     if(ev.allDay){lines.push(`DTSTART;VALUE=DATE:${icalDate(ev.start)}`,`DTEND;VALUE=DATE:${icalDate(ev.end)}`);}
