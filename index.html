@@ -20,14 +20,25 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{
 textarea{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;min-height:235px;resize:vertical}.text-help{line-height:1.85}.text-help summary{font-weight:700;cursor:pointer;color:#44556f}.text-help p{margin:8px 0 0}.text-help code{font-family:inherit}.text-meta{display:flex;gap:12px;margin-top:12px}.text-meta .field:first-child{flex:0 0 140px}
 .export-row{display:flex;gap:10px;margin-top:16px}.btn{border:0;border-radius:11px;background:var(--blue);color:white;padding:12px 16px;min-height:46px;font-weight:700}.btn.primary{flex:1}.btn.secondary{background:#e9f1fb;color:var(--blue);flex:0 0 auto}.btn:hover{filter:brightness(.98)}#status{font-size:12.5px;min-height:18px;margin-top:10px;white-space:pre-line}#status.err{color:var(--red)}#status.ok{color:var(--green)}#status.warn{color:#9b622a}.preview-header{display:flex;gap:8px;align-items:baseline;justify-content:space-between}.preview-header h2{margin:0}.preview-list{margin-top:12px;display:grid;gap:8px;max-height:370px;overflow:auto}.preview-item{border:1px solid var(--border);background:#fbfcfe;border-radius:10px;padding:11px 12px}.preview-item strong{font-size:13.5px;display:block;overflow-wrap:anywhere}.preview-item .meta{font-size:12px;color:var(--muted);margin-top:4px}.preview-summary{margin-top:8px;color:var(--muted);font-size:12px}.note{font-size:12.5px;color:var(--muted);margin:8px 0 0}.visually-hidden{position:absolute;width:1px;height:1px;clip:rect(0,0,0,0);overflow:hidden}.footer{text-align:center;color:var(--muted);font-size:12px;margin-top:16px}.hidden{display:none!important}
 @media(max-width:760px){.wrap{width:min(100% - 24px,580px);padding:18px 0 60px}.content-grid{grid-template-columns:minmax(0,1fr)}.card{padding:16px;border-radius:14px}.calendar-days button,.empty-cell{height:45px}.field.small{flex:0 0 95px}.date-row .row-times{grid-template-columns:1fr 1fr}.export-row{flex-wrap:wrap}.export-row .btn{flex:1;min-width:130px}.top h1{font-size:22px}}
-@media(max-width:480px){.time-fields,.date-row .row-times{grid-template-columns:minmax(0,1fr)}.time-fields{gap:12px}.time-fields .input[type="time"],.date-row .row-times .input[type="time"]{min-height:44px}}
+@media(max-width:480px){.time-fields,.date-row .row-times{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}}
 @media(max-width:360px){.calendar-days button,.empty-cell{height:39px}.calendar-week,.calendar-days{gap:3px}.card{padding:13px}.fields{gap:8px}}
+
+/* iPhone-safe two-column time pickers: the native picker stays interactive, while
+   the visible value is drawn in an element with a predictable, fixed layout. */
+.time-fields,.date-row .row-times{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-width:0;width:100%;max-width:100%}
+.time-fields>.field,.date-row .row-times>label{min-width:0;width:100%;max-width:100%}
+.time-picker{position:relative;display:flex;align-items:center;justify-content:center;min-width:0;max-width:100%;width:100%;height:46px;overflow:hidden;border:1px solid #d7dfe8;border-radius:10px;background:#fff;color:var(--text)}
+.time-picker:focus-within{border-color:#7eacec;outline:2px solid #b9d6ff;outline-offset:1px}
+.time-visible{display:block;min-width:0;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:clip;pointer-events:none;font-size:16px;line-height:1.2;font-variant-numeric:tabular-nums}
+.time-picker input[type="time"]{position:absolute;top:0;left:0;right:0;bottom:0;display:block;margin:0;padding:0;width:100%;max-width:100%;min-width:0;height:100%;min-height:0;box-sizing:border-box;border:0;opacity:0;cursor:pointer;z-index:1;-webkit-appearance:none;appearance:none}
+.date-row .time-picker{height:40px}
+.date-row .time-visible{font-size:14px}
 </style>
 </head>
 <body>
 <main class="wrap">
 <header class="top">
-  <div class="eyebrow">APPLE CALENDAR · 批次建立 <span class="version">v2.0.1</span></div>
+  <div class="eyebrow">APPLE CALENDAR · 批次建立 <span class="version">v2.0.2</span></div>
   <h1>行程批次匯入 Apple 行事曆</h1>
   <p class="subtitle">選日期、安排時間、自動編堂次，一次產生 .ics 行程。完全在瀏覽器離線處理，不會上傳資料。</p>
 </header>
@@ -82,7 +93,7 @@ textarea{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-s
       </div>
       <p class="hint" id="timeModeHint">所有選取日期使用同一組開始、結束時間。</p>
       <div id="commonTimeBlock" style="margin-top:14px">
-        <div class="time-fields"><div class="field"><label class="label" for="commonStart">開始時間</label><input class="input" id="commonStart" type="time" value="09:00"></div><div class="field"><label class="label" for="commonEnd">結束時間</label><input class="input" id="commonEnd" type="time" value="10:00"></div></div>
+        <div class="time-fields"><div class="field"><label class="label" for="commonStart">開始時間</label><div class="time-picker"><span class="time-visible" aria-hidden="true">09:00</span><input class="input" id="commonStart" type="time" value="09:00"></div></div><div class="field"><label class="label" for="commonEnd">結束時間</label><div class="time-picker"><span class="time-visible" aria-hidden="true">10:00</span><input class="input" id="commonEnd" type="time" value="10:00"></div></div></div>
         <div style="margin-top:13px"><label class="label">快速設定時長</label><div class="chips" id="durationChips"></div></div>
       </div>
       <hr class="divider">
@@ -100,7 +111,7 @@ textarea{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-s
     </section>
   </div>
 </div>
-<p class="footer">行程批次匯入 Apple 行事曆 · v2.0.1 · 無需登入、無外部套件、資料不會上傳</p>
+<p class="footer">行程批次匯入 Apple 行事曆 · v2.0.2 · 無需登入、無外部套件、資料不會上傳</p>
 </main>
 <script>
 (() => {
@@ -139,6 +150,19 @@ const escapeHTML = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&l
 const dateLabel = key => { const [y,m,d] = key.split('-').map(Number); const dow='日一二三四五六'[new Date(y,m-1,d).getDay()]; return `${y}/${pad(m)}/${pad(d)}（${dow}）`; };
 const timeToMin = t => {const m=String(t).match(/^(\d{1,2}):(\d{2})$/); if(!m)return null;const h=+m[1],min=+m[2];return h<=23 && min<=59? h*60+min:null;};
 const toTime = m => `${pad(Math.floor(((m%1440)+1440)%1440/60))}:${pad(((m%60)+60)%60)}`;
+function syncTimeVisible(input){
+  const output=input.closest('.time-picker')?.querySelector('.time-visible');
+  if(output) output.textContent=input.value||'--:--';
+}
+function timePicker(input){
+  const wrap=document.createElement('span');wrap.className='time-picker';
+  const visible=document.createElement('span');visible.className='time-visible';
+  visible.setAttribute('aria-hidden','true');visible.textContent=input.value||'--:--';
+  wrap.append(visible,input);
+  input.addEventListener('input',()=>syncTimeVisible(input));
+  input.addEventListener('change',()=>syncTimeVisible(input));
+  return wrap;
+}
 function syncStatus(message='',cls=''){$('status').textContent=message;$('status').className=cls;}
 function invalidatePreview(){ $('previewCount').textContent='尚未更新'; $('previewSummary').textContent='設定已變更，請重新檢查預覽。'; }
 function yearMonthChange(delta){ const d=new Date(viewYear,viewMonth+delta,1);viewYear=d.getFullYear();viewMonth=d.getMonth();renderCalendar(); }
@@ -180,7 +204,7 @@ function renderDateRows(){
       for(const [field,label] of [['start','開始時間'],['end','結束時間']]){
         const lab=document.createElement('label');lab.textContent=label;
         const inp=document.createElement('input');inp.className='input';inp.type='time';inp.value=val[field]|| (field==='start'?'09:00':'10:00');inp.setAttribute('aria-label',`${dateLabel(key)}${label}`);
-        inp.addEventListener('input',()=>{val[field]=inp.value;val.edited=true;invalidatePreview();});lab.appendChild(inp);times.appendChild(lab);
+        inp.addEventListener('input',()=>{val[field]=inp.value;val.edited=true;invalidatePreview();});lab.appendChild(timePicker(inp));times.appendChild(lab);
       }row.appendChild(times);
     }
     root.appendChild(row);
@@ -199,7 +223,7 @@ function setTimeMode(next){
 }
 function renderDurationChips(){const root=$('durationChips');root.replaceChildren();durationOptions.forEach(min=>{
   const b=document.createElement('button');b.type='button';b.className='chip'+(selectedDuration===min?' selected':'');b.textContent=min<60?min+'分鐘':(min%60===0?min/60+'小時':min/60+'小時');
-  b.addEventListener('click',()=>{selectedDuration=min;const from=timeToMin($('commonStart').value);if(from!==null)$('commonEnd').value=toTime(from+min);renderDurationChips();renderDateRows();invalidatePreview();});root.appendChild(b);
+  b.addEventListener('click',()=>{selectedDuration=min;const from=timeToMin($('commonStart').value);if(from!==null)$('commonEnd').value=toTime(from+min);syncTimeVisible($('commonEnd'));renderDurationChips();renderDateRows();invalidatePreview();});root.appendChild(b);
 });}
 function renderReminderChips(){const root=$('reminderChips');root.replaceChildren();reminderOptions.forEach(opt=>{
   const b=document.createElement('button');b.type='button';b.className='chip'+(reminders.includes(opt.min)?' selected':'');b.textContent=opt.label;b.setAttribute('aria-pressed',String(reminders.includes(opt.min)));
@@ -308,7 +332,7 @@ function fold(line){const enc=new TextEncoder();const parts=[];let segment='',by
 }
 function makeICS(events){
   const stamp=icalStamp(new Date()),seed=`${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//importcalender v2.0.1//zh-TW','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//importcalender v2.0.2//zh-TW','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
   events.forEach((ev,i)=>{
     lines.push('BEGIN:VEVENT',`UID:${seed}-${i}@importcalender.local`,`DTSTAMP:${stamp}`);
     if(ev.allDay){lines.push(`DTSTART;VALUE=DATE:${icalDate(ev.start)}`,`DTEND;VALUE=DATE:${icalDate(ev.end)}`);}
@@ -345,6 +369,8 @@ $('numberingEnabled').addEventListener('change',()=>{$('numberOptions').classLis
 ['numberStyle','numberStart','commonTitle'].forEach(id=>$(id).addEventListener('input',()=>{renderDateRows();invalidatePreview();}));
 $('commonStart').addEventListener('input',()=>{selectedDuration=null;renderDurationChips();renderDateRows();invalidatePreview();});
 $('commonEnd').addEventListener('input',()=>{selectedDuration=null;renderDurationChips();renderDateRows();invalidatePreview();});
+['commonStart','commonEnd'].forEach(id=>{$(id).addEventListener('input',()=>syncTimeVisible($(id)));$(id).addEventListener('change',()=>syncTimeVisible($(id)));});
+window.addEventListener('pageshow',()=>document.querySelectorAll('.time-picker input[type=time]').forEach(syncTimeVisible));
 ['rawInput','defaultYear'].forEach(id=>$(id).addEventListener('input',invalidatePreview));
 $('previewBtn').addEventListener('click',()=>run(false));
 $('exportBtn').addEventListener('click',()=>run(true));
