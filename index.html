@@ -2,473 +2,335 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f6f7f9">
 <title>行程批次匯入 Apple 行事曆</title>
 <style>
-  :root {
-    --bg: #f5f5f4;
-    --card: #ffffff;
-    --border: #dcdcd8;
-    --text: #1c1c1a;
-    --text-secondary: #6b6b66;
-    --accent: #185fa5;
-    --danger: #a32d2d;
-    --success: #3b6d11;
-  }
-  * { box-sizing: border-box; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    margin: 0;
-    padding: 24px 16px 60px;
-    line-height: 1.6;
-  }
-  .wrap { max-width: 640px; margin: 0 auto; }
-  h1 { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
-  .subtitle { color: var(--text-secondary); font-size: 14px; margin: 0 0 20px; }
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 16px;
-  }
-  label { font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 6px; }
-  textarea {
-    width: 100%;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 13px;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: #fafaf9;
-    resize: vertical;
-    min-height: 200px;
-  }
-  input[type="number"], input[type="text"] {
-    font-size: 14px;
-    padding: 8px 10px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: #fafaf9;
-    width: 100px;
-  }
-  .row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; }
-  .field { display: flex; flex-direction: column; gap: 4px; }
-  .help {
-    background: #f0efe9;
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 12.5px;
-    color: var(--text-secondary);
-    line-height: 1.8;
-  }
-  .help b { color: var(--text); font-weight: 600; }
-  code {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    background: #eae9e3;
-    padding: 1px 5px;
-    border-radius: 4px;
-    font-size: 12px;
-  }
-  button {
-    background: var(--accent);
-    color: white;
-    border: none;
-    font-size: 15px;
-    font-weight: 600;
-    padding: 12px 20px;
-    border-radius: 10px;
-    cursor: pointer;
-    width: 100%;
-    margin-top: 16px;
-  }
-  button:active { opacity: 0.85; }
-  #status { font-size: 13px; min-height: 20px; margin-top: 10px; }
-  .status-ok { color: var(--success); }
-  .status-err { color: var(--danger); }
-  #list { display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; margin-top: 10px; }
-  .ev-row { background: #fafaf9; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 13px; }
-  .ev-title { font-weight: 600; }
-  .ev-meta { color: var(--text-secondary); margin-top: 2px; font-size: 12.5px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .chip {
-    border: 1px solid var(--border);
-    background: #fafaf9;
-    border-radius: 999px;
-    padding: 6px 12px;
-    font-size: 13px;
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
-  }
-  .chip.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
+:root{color-scheme:light;--bg:#f6f7f9;--card:#fff;--text:#212936;--muted:#657183;--border:#e1e6ed;--blue:#2766ba;--blue-light:#e8f1ff;--red:#ac3744;--green:#206f54;--shadow:0 5px 22px rgba(38,60,88,.045)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;line-height:1.5;font-size:15px}
+button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.45}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #9ac4ff;outline-offset:2px}
+.wrap{width:min(100% - 32px,1020px);margin:0 auto;padding:28px 0 72px}.top{margin-bottom:18px}.eyebrow{font-size:12px;color:var(--blue);font-weight:700;letter-spacing:.08em;margin-bottom:7px}.top h1{font-size:clamp(22px,3.5vw,28px);line-height:1.25;margin:0 0 8px;font-weight:750}.subtitle{color:var(--muted);margin:0;font-size:13px}.version{display:inline-block;padding:3px 7px;border:1px solid var(--border);border-radius:6px;margin-left:8px;color:var(--muted);letter-spacing:0;font-weight:500}
+.card{background:var(--card);border:1px solid var(--border);border-radius:17px;padding:20px;box-shadow:var(--shadow);margin-bottom:15px}.card h2{font-size:17px;margin:0 0 14px}.card h3{font-size:14px;margin:0 0 10px}.mini{font-size:12px;color:var(--muted)}.label{font-size:13px;color:#455266;font-weight:650;display:block;margin:0 0 7px}.input,textarea,select{width:100%;background:#fff;border:1px solid #d7dfe8;border-radius:10px;padding:10px 11px;color:var(--text);min-height:43px}.input[type=time],.input[type=number],.input[type=date]{font-variant-numeric:tabular-nums}.input:focus,textarea:focus,select:focus{border-color:#7eacec}.field{min-width:0;flex:1}.field+.field{margin-top:0}.fields{display:flex;gap:12px}.field.small{flex:0 0 110px}.hint{font-size:12px;color:var(--muted);margin:7px 0 0}.help{font-size:13px;color:var(--muted);background:#f4f6f9;border-radius:10px;padding:11px 13px;margin:12px 0 0}.help code{background:#e6ebf2;border-radius:4px;padding:1px 4px;white-space:nowrap}
+.mode-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#e9edf3;border-radius:13px;padding:5px;margin-bottom:16px}.mode-tabs button{border:0;background:transparent;border-radius:10px;color:#526176;font-weight:700;padding:11px 7px}.mode-tabs button.active{color:var(--blue);background:#fff;box-shadow:0 1px 4px #2442681c}
+.content-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(310px,.85fr);gap:15px;align-items:start}.content-grid>.card{margin:0}.section-title{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap}.section-title h2{margin:0}.tinybtn{border:1px solid var(--border);padding:6px 11px;background:#fff;color:var(--text);border-radius:8px;font-size:12px;font-weight:600}.tinybtn:hover{background:#f3f6fb}.danger-link{color:var(--red);border-color:#f2d9dc}.calendar-head{display:flex;align-items:center;gap:8px;justify-content:space-between;margin:14px 0}.calendar-head strong{font-size:17px;font-variant-numeric:tabular-nums}.month-controls{display:flex;gap:6px}.month-controls button{border:1px solid var(--border);background:#fff;width:37px;height:34px;border-radius:9px;font-weight:700}.month-controls .todaybtn{width:auto;padding:0 10px;font-size:12px}
+.calendar-week,.calendar-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.calendar-week{font-size:12px;text-align:center;color:var(--muted);margin-bottom:5px}.calendar-days button,.empty-cell{height:46px;border-radius:10px;display:grid;place-content:center;border:1px solid transparent;background:#f7f9fc;position:relative}.calendar-days button{color:var(--text);font-variant-numeric:tabular-nums}.calendar-days button:hover{border-color:#9fc4f7}.calendar-days button.today{border-color:#78a8e6}.calendar-days button.selected{color:#fff;background:var(--blue);border-color:var(--blue);font-weight:750}.calendar-days button.selected::after{content:"✓";font-size:10px;position:absolute;right:5px;top:2px}.empty-cell{background:transparent}
+.chips{display:flex;flex-wrap:wrap;gap:7px}.chip{padding:7px 11px;border-radius:999px;border:1px solid var(--border);background:#f8fafc;color:#45566c;font-size:12px;font-weight:600;min-height:35px}.chip.selected{background:var(--blue);border-color:var(--blue);color:white}.segmented{display:flex;gap:5px;background:#edf1f6;padding:4px;border-radius:11px}.segmented button{flex:1;border:0;border-radius:8px;background:transparent;padding:10px 6px;color:#536176;font-size:12.5px;font-weight:650}.segmented button.active{background:#fff;color:var(--blue);box-shadow:0 1px 3px #0000000d}.divider{border:0;border-top:1px solid var(--border);margin:17px 0}.control-stack{display:grid;gap:14px}.control-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.selected-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:15px 0 9px}.selected-header h3{margin:0}.selected-count{border-radius:99px;background:#e9f1ff;color:var(--blue);font-size:12px;padding:3px 9px;font-weight:750}.selected-list{display:grid;gap:8px;max-height:365px;overflow:auto}.date-row{border:1px solid var(--border);background:#fcfdff;border-radius:10px;padding:10px;display:grid;grid-template-columns:1fr auto;gap:9px;align-items:center}.date-row .row-title{font-size:13px;font-weight:700}.date-row .row-hint{font-size:12px;color:var(--muted);margin-top:2px}.date-row.editable{grid-template-columns:1fr auto}.date-row .row-times{display:grid;grid-template-columns:1fr 1fr;gap:8px;grid-column:1/-1}.date-row .row-times label{font-size:11px;color:var(--muted)}.date-row .row-times input{font-size:14px;min-height:38px;padding:6px}.date-row .remove{border:0;background:#f3f5f9;color:#8c4051;width:30px;height:30px;border-radius:8px}.empty-state{border:1px dashed var(--border);color:var(--muted);text-align:center;font-size:13px;border-radius:10px;padding:23px 12px}
+.numbering{display:flex;align-items:center;gap:9px;font-size:13px}.numbering input{width:17px;height:17px;accent-color:var(--blue)}.number-options{display:grid;grid-template-columns:1fr 100px;gap:10px;margin-top:11px}.number-options select{width:100%}.number-options input{width:100%}
+textarea{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;min-height:235px;resize:vertical}.text-help{line-height:1.85}.text-help summary{font-weight:700;cursor:pointer;color:#44556f}.text-help p{margin:8px 0 0}.text-help code{font-family:inherit}.text-meta{display:flex;gap:12px;margin-top:12px}.text-meta .field:first-child{flex:0 0 140px}
+.export-row{display:flex;gap:10px;margin-top:16px}.btn{border:0;border-radius:11px;background:var(--blue);color:white;padding:12px 16px;min-height:46px;font-weight:700}.btn.primary{flex:1}.btn.secondary{background:#e9f1fb;color:var(--blue);flex:0 0 auto}.btn:hover{filter:brightness(.98)}#status{font-size:12.5px;min-height:18px;margin-top:10px;white-space:pre-line}#status.err{color:var(--red)}#status.ok{color:var(--green)}#status.warn{color:#9b622a}.preview-header{display:flex;gap:8px;align-items:baseline;justify-content:space-between}.preview-header h2{margin:0}.preview-list{margin-top:12px;display:grid;gap:8px;max-height:370px;overflow:auto}.preview-item{border:1px solid var(--border);background:#fbfcfe;border-radius:10px;padding:11px 12px}.preview-item strong{font-size:13.5px;display:block;overflow-wrap:anywhere}.preview-item .meta{font-size:12px;color:var(--muted);margin-top:4px}.preview-summary{margin-top:8px;color:var(--muted);font-size:12px}.note{font-size:12.5px;color:var(--muted);margin:8px 0 0}.visually-hidden{position:absolute;width:1px;height:1px;clip:rect(0,0,0,0);overflow:hidden}.footer{text-align:center;color:var(--muted);font-size:12px;margin-top:16px}.hidden{display:none!important}
+@media(max-width:760px){.wrap{width:min(100% - 24px,580px);padding:18px 0 60px}.content-grid{grid-template-columns:minmax(0,1fr)}.card{padding:16px;border-radius:14px}.calendar-days button,.empty-cell{height:45px}.field.small{flex:0 0 95px}.date-row .row-times{grid-template-columns:1fr 1fr}.export-row{flex-wrap:wrap}.export-row .btn{flex:1;min-width:130px}.top h1{font-size:22px}}
+@media(max-width:360px){.calendar-days button,.empty-cell{height:39px}.calendar-week,.calendar-days{gap:3px}.card{padding:13px}.fields{gap:8px}}
 </style>
 </head>
 <body>
-<div class="wrap">
+<main class="wrap">
+<header class="top">
+  <div class="eyebrow">APPLE CALENDAR · 批次建立 <span class="version">v2.0.0</span></div>
   <h1>行程批次匯入 Apple 行事曆</h1>
-  <p class="subtitle">此頁面完全離線運作，資料不會上傳。</p>
-
-  <div class="card">
-    <label for="input">貼上行程文字</label>
-    <textarea id="input" placeholder="十二堂課 @15,1d
-* 9/6（日）10:00
-* 9/13（日）10:00
-* 9/20（日）10:00
-
-2026-09-01 09:00-10:00 團隊會議
-2026-09-02 全天 出差台中 @0"></textarea>
+  <p class="subtitle">選日期、安排時間、自動編堂次，一次產生 .ics 行程。完全在瀏覽器離線處理，不會上傳資料。</p>
+</header>
+<div class="mode-tabs" role="tablist" aria-label="輸入方式">
+  <button type="button" role="tab" aria-selected="true" class="active" data-tab="calendar">日曆挑日期</button>
+  <button type="button" role="tab" aria-selected="false" data-tab="text">貼上行程文字</button>
+</div>
+<section class="card" aria-label="共同設定">
+  <div class="fields">
+    <div class="field"><label class="label" for="commonTitle">行程／課程名稱</label><input id="commonTitle" class="input" type="text" placeholder="例如：瑜伽課、韓文課、健身課" maxlength="180" autocomplete="off"></div>
   </div>
-
-  <div class="card help">
-    <b>在「檔案」App裡直接點開只會預覽，沒有加入按鈕</b>，若遇到這種情況請改成用「郵件」手動附加該檔案寄出再開啟。
-    <br><br>
-    <b>行程文字自動偵測日期時間</b>，標題在前在後、用 <code>｜</code>、空格、或緊貼括號皆可，例如：<br>
-    <code>2026-09-01 09:00-10:00 團隊會議</code>　<code>第一堂 ｜ 9/6（日）09:30</code>
-    <br><br>
-    <b>群組標題</b>：標題行（可加 <code>@提醒</code>）+ 多行 <code>*</code> 開頭只寫日期時間，共用同一標題，例：<code>十二堂課 @15,1d</code> 接 <code>* 9/6（日）10:00</code>
-    <br><br>
-    行末加 <code>@15,1d</code> 可覆蓋該行提醒（逗號分隔，<code>15</code>=分鐘前、<code>2h</code>=小時前、<code>1d</code>=天前），<code>@0</code>=不提醒
+  <hr class="divider">
+  <label class="numbering"><input id="numberingEnabled" type="checkbox" checked><strong>自動在標題後加入編號</strong><span class="mini">依日期先後排序</span></label>
+  <div id="numberOptions" class="number-options">
+    <div><label class="label" for="numberStyle">編號形式</label><select id="numberStyle"><option value="lesson">第 1 堂、第 2 堂</option><option value="time">第 1 次、第 2 次</option><option value="number">#1、#2</option></select></div>
+    <div><label class="label" for="numberStart">起始編號</label><input id="numberStart" class="input" type="number" value="1" min="1" max="9999"></div>
   </div>
-
-  <div class="card">
-    <div class="field" style="margin-bottom:14px;">
-      <label>年份（無年份日期用）</label>
-      <input id="year" type="number" value="2026" style="width:100px;">
-    </div>
-
-    <div class="field" style="margin-bottom:14px;">
-      <label>預設時長</label>
-      <div class="chips" id="durationChipRow"></div>
-    </div>
-
-    <div class="field">
-      <label>預設提醒（最多選 2 個，跟 iPhone 行事曆一樣）</label>
-      <div class="chips" id="reminderChipRow"></div>
-    </div>
-
-    <button id="parseBtn">產生並下載 .ics 檔案</button>
-    <p style="font-size:13px; font-weight:700; color:var(--text); margin:10px 0 0;">跳出分享清單請選「郵件」寄給自己，開信點附件才會跳出「加入全部」畫面完成匯入。</p>
-    <div id="status"></div>
+  <p class="hint">範例：瑜伽課｜第1堂、瑜伽課｜第2堂。若原始標題已有「第幾堂／次」，不會再重複加編號。</p>
+</section>
+<div class="content-grid">
+  <div>
+    <section id="calendarPanel" class="card" role="tabpanel">
+      <div class="section-title"><h2>選擇上課／行程日期</h2><button type="button" id="clearDates" class="tinybtn danger-link">清除選取</button></div>
+      <p class="hint">日期可跨月份、跨年份連續選，不必重複輸入年份與日期。再次點選可取消。</p>
+      <div class="calendar-head"><strong id="monthLabel"></strong><div class="month-controls"><button id="prevMonth" type="button" aria-label="上個月">‹</button><button id="todayMonth" type="button" class="todaybtn">本月</button><button id="nextMonth" type="button" aria-label="下個月">›</button></div></div>
+      <div class="calendar-week" aria-hidden="true"><div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div></div>
+      <div id="calendarDays" class="calendar-days" role="group" aria-label="可選取日期"></div>
+      <div class="selected-header"><h3>已選日期</h3><span id="selectedCount" class="selected-count">0 天</span></div>
+      <div id="selectedDates" class="selected-list"></div>
+    </section>
+    <section id="textPanel" class="card hidden" role="tabpanel">
+      <h2>貼上行程文字</h2>
+      <p class="hint" style="margin:-6px 0 12px">支援原本的文字格式；現在日期後可不寫時間，也能處理 12 月接隔年 1 月。</p>
+      <label class="label" for="rawInput">一行一筆，或標題＋多行日期</label>
+      <textarea id="rawInput" placeholder="十二堂課 @15,1d&#10;* 12/20&#10;* 12/27&#10;* 1/3&#10;* 1/10 14:00-15:30&#10;&#10;2026-11-20 09:00-10:00 開會&#10;2026-11-21 全天 出差 @0"></textarea>
+      <div class="text-meta"><div class="field"><label class="label" for="defaultYear">首筆無年份日期的起始年份</label><input class="input" id="defaultYear" type="number" min="1900" max="2100" value="2026"></div></div>
+      <details class="help text-help"><summary>文字格式說明</summary>
+        <p>同一標題下輸入 <code>* 9/6</code>、<code>* 9/13</code> 即可批次建立；不寫時間使用下方的共同開始時間與結束時間。</p>
+        <p><code>12/27</code> 接 <code>1/3</code> 會自動判定隔年；寫 <code>2027-01-03</code> 可直接指定年份。可使用 <code>9/6（日）10:00</code>、<code>2026-09-01 09:00-10:00 會議</code>、<code>全天</code>。</p>
+        <p>在標題或行末加 <code>@15,1d</code> 覆蓋提醒，<code>@0</code> 表示不提醒。已有個別編號的標題不會再增加編號。</p>
+      </details>
+    </section>
   </div>
-
-  <div class="card" id="preview" style="display:none;">
-    <p style="font-size:13px; color:var(--text-secondary); margin:0 0 8px;">已解析 <span id="count">0</span> 筆行程</p>
-    <div id="list"></div>
+  <div>
+    <section class="card">
+      <h2>設定日期的時間</h2>
+      <label class="label">每天的時間安排</label>
+      <div id="timeModes" class="segmented" role="group" aria-label="時間模式">
+        <button class="active" type="button" data-time="same" aria-pressed="true">每天相同</button>
+        <button type="button" data-time="different" aria-pressed="false">每天不同</button>
+        <button type="button" data-time="allday" aria-pressed="false">全天</button>
+      </div>
+      <p class="hint" id="timeModeHint">所有選取日期使用同一組開始、結束時間。</p>
+      <div id="commonTimeBlock" style="margin-top:14px">
+        <div class="fields"><div class="field"><label class="label" for="commonStart">開始時間</label><input class="input" id="commonStart" type="time" value="09:00"></div><div class="field"><label class="label" for="commonEnd">結束時間</label><input class="input" id="commonEnd" type="time" value="10:00"></div></div>
+        <div style="margin-top:13px"><label class="label">快速設定時長</label><div class="chips" id="durationChips"></div></div>
+      </div>
+      <hr class="divider">
+      <h3>行程提醒（最多 2 個）</h3>
+      <div id="reminderChips" class="chips"></div>
+      <p class="hint">預設：1 小時前＋1 天前。再次點選即可取消提醒。</p>
+      <div class="export-row"><button type="button" id="previewBtn" class="btn secondary">檢查預覽</button><button type="button" id="exportBtn" class="btn primary">產生 .ics 檔案</button></div>
+      <div id="status" role="status" aria-live="polite"></div>
+      <p class="note">iPhone 若只顯示檔案預覽，可透過分享選單的「郵件」寄給自己，再開啟信件附件，選「加入全部」。</p>
+    </section>
+    <section class="card" id="previewPanel">
+      <div class="preview-header"><h2>匯入前預覽</h2><span id="previewCount" class="selected-count">0 筆</span></div>
+      <div id="previewList" class="preview-list"><div class="empty-state">選擇日期或輸入行程後，點選「檢查預覽」</div></div>
+      <p class="preview-summary" id="previewSummary"></p>
+    </section>
   </div>
 </div>
-
+<p class="footer">行程批次匯入 Apple 行事曆 · v2.0.0 · 無需登入、無外部套件、資料不會上傳</p>
+</main>
 <script>
-function pad(n){ return String(n).padStart(2,'0'); }
-function fmtICS(d){
-  return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T'+pad(d.getHours())+pad(d.getMinutes())+'00';
-}
-function fmtICSDate(d){
-  return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate());
-}
-function escapeText(s){
-  return s.replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,');
-}
-function parseReminderToken(tok){
-  tok = tok.trim();
-  let m = tok.match(/^(\d+)d$/i);
-  if(m) return parseInt(m[1],10) * 1440;
-  m = tok.match(/^(\d+)h$/i);
-  if(m) return parseInt(m[1],10) * 60;
-  m = tok.match(/^(\d+)$/);
-  if(m) return parseInt(m[1],10);
-  return null;
-}
-function parseReminders(str){
-  if(str === undefined || str === null) return [];
-  const parts = String(str).split(',').map(s => s.trim()).filter(s => s.length > 0);
-  const result = [];
-  parts.forEach(p => {
-    const v = parseReminderToken(p);
-    if(v !== null) result.push(v);
-  });
-  return result;
-}
-function fmtMinutes(m){
-  if(m === 0) return '0';
-  if(m % 1440 === 0) return (m/1440) + 'd';
-  if(m % 60 === 0) return (m/60) + 'h';
-  return String(m);
-}
-
-// ---- iOS 風格快速選項（無輸入框，狀態存在記憶體中） ----
-const DURATION_OPTIONS = [15, 30, 45, 60, 90, 120, 180];
-const REMINDER_OPTIONS = [
-  { label: '準時', min: 0 },
-  { label: '5分鐘前', min: 5 },
-  { label: '10分鐘前', min: 10 },
-  { label: '15分鐘前', min: 15 },
-  { label: '30分鐘前', min: 30 },
-  { label: '1小時前', min: 60 },
-  { label: '2小時前', min: 120 },
-  { label: '1天前', min: 1440 },
-  { label: '2天前', min: 2880 },
-  { label: '1週前', min: 10080 }
-];
-
-let selectedDuration = 60;
-let selectedReminders = [60, 1440]; // 預設：1小時前 + 1天前
-
-const durationRow = document.getElementById('durationChipRow');
-const reminderRow = document.getElementById('reminderChipRow');
-
-DURATION_OPTIONS.forEach(min => {
-  const chip = document.createElement('div');
-  chip.className = 'chip';
-  chip.textContent = min < 60 ? min + '分' : (min % 60 === 0 ? (min/60) + '小時' : (min/60).toFixed(1) + '小時');
-  chip.dataset.min = min;
-  chip.addEventListener('click', () => {
-    selectedDuration = min;
-    syncDurationChips();
-  });
-  durationRow.appendChild(chip);
-});
-
-REMINDER_OPTIONS.forEach(opt => {
-  const chip = document.createElement('div');
-  chip.className = 'chip';
-  chip.textContent = opt.label;
-  chip.dataset.min = opt.min;
-  chip.addEventListener('click', () => {
-    const idx = selectedReminders.indexOf(opt.min);
-    if(idx >= 0){
-      selectedReminders.splice(idx, 1);
-    } else {
-      if(selectedReminders.length >= 2){
-        selectedReminders.shift(); // iPhone 行事曆最多只有「第一提醒」「第二提醒」兩個，選第3個時淘汰最舊的
-      }
-      selectedReminders.push(opt.min);
-    }
-    syncReminderChips();
-  });
-  reminderRow.appendChild(chip);
-});
-
-function syncDurationChips(){
-  Array.from(durationRow.children).forEach(chip => {
-    chip.classList.toggle('selected', parseInt(chip.dataset.min,10) === selectedDuration);
-  });
-}
-function syncReminderChips(){
-  Array.from(reminderRow.children).forEach(chip => {
-    chip.classList.toggle('selected', selectedReminders.indexOf(parseInt(chip.dataset.min,10)) !== -1);
-  });
-}
-syncDurationChips();
-syncReminderChips();
-// ---- 快速選項結束 ----
-
-
-document.getElementById('parseBtn').addEventListener('click', function(){
-  const raw = document.getElementById('input').value;
-  const defaultReminders = selectedReminders.slice();
-  const defaultDuration = selectedDuration;
-  const defaultYear = parseInt(document.getElementById('year').value, 10);
-  const statusEl = document.getElementById('status');
-  const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-
-  if(lines.length === 0){
-    statusEl.textContent = '請先貼上至少一行行程。';
-    statusEl.className = 'status-err';
-    return;
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2, '0');
+const iso = (y,m,d) => `${y}-${pad(m)}-${pad(d)}`;
+const now = new Date();
+const todayKey = iso(now.getFullYear(), now.getMonth()+1, now.getDate());
+const selectedDates = new Map();
+let viewYear = now.getFullYear(), viewMonth = now.getMonth();
+let activeTab = 'calendar', timeMode = 'same', reminders = [60,1440], selectedDuration = 60;
+const durationOptions = [15,30,45,60,90,120,180];
+const reminderOptions = [{min:0,label:'準時'}, {min:5,label:'5分鐘前'}, {min:10,label:'10分鐘前'}, {min:15,label:'15分鐘前'}, {min:30,label:'30分鐘前'}, {min:60,label:'1小時前'}, {min:120,label:'2小時前'}, {min:1440,label:'1天前'}, {min:2880,label:'2天前'}, {min:10080,label:'1週前'}];
+$('defaultYear').value = String(now.getFullYear());
+const sortedDates = () => [...selectedDates.keys()].sort();
+const escapeHTML = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dateLabel = key => { const [y,m,d] = key.split('-').map(Number); const dow='日一二三四五六'[new Date(y,m-1,d).getDay()]; return `${y}/${pad(m)}/${pad(d)}（${dow}）`; };
+const timeToMin = t => {const m=String(t).match(/^(\d{1,2}):(\d{2})$/); if(!m)return null;const h=+m[1],min=+m[2];return h<=23 && min<=59? h*60+min:null;};
+const toTime = m => `${pad(Math.floor(((m%1440)+1440)%1440/60))}:${pad(((m%60)+60)%60)}`;
+function syncStatus(message='',cls=''){$('status').textContent=message;$('status').className=cls;}
+function invalidatePreview(){ $('previewCount').textContent='尚未更新'; $('previewSummary').textContent='設定已變更，請重新檢查預覽。'; }
+function yearMonthChange(delta){ const d=new Date(viewYear,viewMonth+delta,1);viewYear=d.getFullYear();viewMonth=d.getMonth();renderCalendar(); }
+function renderCalendar(){
+  $('monthLabel').textContent=`${viewYear} 年 ${viewMonth+1} 月`;
+  const first=new Date(viewYear,viewMonth,1).getDay();
+  const days=new Date(viewYear,viewMonth+1,0).getDate();
+  const root=$('calendarDays');root.replaceChildren();
+  for(let i=0;i<first;i++){const e=document.createElement('div');e.className='empty-cell';root.appendChild(e);}
+  for(let day=1;day<=days;day++){
+    const key=iso(viewYear,viewMonth+1,day), b=document.createElement('button');
+    b.type='button';b.textContent=day;b.dataset.date=key;b.className=[selectedDates.has(key)?'selected':'',key===todayKey?'today':''].filter(Boolean).join(' ');
+    b.setAttribute('aria-pressed',String(selectedDates.has(key)));b.setAttribute('aria-label',`${dateLabel(key)}${selectedDates.has(key)?'，已選取':''}`);
+    b.addEventListener('click',()=>{
+      if(selectedDates.has(key))selectedDates.delete(key);else selectedDates.set(key,{start:$('commonStart').value,end:$('commonEnd').value,edited:false});
+      renderCalendar();renderDateRows();invalidatePreview();syncStatus();
+    });root.appendChild(b);
   }
-
-  const events = [];
-  const errors = [];
-  let currentTitle = null;
-  let currentReminders = defaultReminders;
-
-  const bulletMarkerRe = /^[*\-•]\s*/;
-  const dtRe = /(\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2})\s*(?:[（(][^）)]*[）)])?\s*(全天|\d{1,2}:\d{2}(?:-\d{1,2}:\d{2})?)/;
-
-  lines.forEach((line, idx) => {
-    let isBullet = false;
-    let content = line;
-    if(bulletMarkerRe.test(content)){
-      isBullet = true;
-      content = content.replace(bulletMarkerRe, '');
+}
+function currentNumber(num){if(!$('numberingEnabled').checked)return '';
+  const v=$('numberStyle').value;return v==='number'?`#${num}`:v==='time'?`第${num}次`:`第${num}堂`;
+}
+function titleWithNumber(title,n){const base=String(title).trim();if(!$('numberingEnabled').checked || /第\s*[一二三四五六七八九十百千零〇\d]+\s*[堂次]/.test(base) || /#\d+/.test(base))return base;
+  return `${base}｜${currentNumber(n)}`;
+}
+function startNo(){const n=Number($('numberStart').value);return Number.isInteger(n)&&n>=1&&n<=9999?n:null;}
+function renderDateRows(){
+  const keys=sortedDates();$('selectedCount').textContent=`${keys.length} 天`;
+  const root=$('selectedDates');root.replaceChildren();
+  if(!keys.length){root.innerHTML='<div class="empty-state">尚未選擇日期，點上方日曆即可加入</div>';return;}
+  keys.forEach((key,index)=>{
+    const val=selectedDates.get(key),row=document.createElement('div');
+    row.className='date-row'+(timeMode==='different'?' editable':'');
+    const title=document.createElement('div');title.innerHTML=`<div class="row-title">${escapeHTML(dateLabel(key))}</div><div class="row-hint">${$('numberingEnabled').checked?escapeHTML(currentNumber((startNo()||1)+index))+' · ':''}${timeMode==='allday'?'全天':timeMode==='same'?escapeHTML($('commonStart').value)+'–'+escapeHTML($('commonEnd').value):'分別設定時間'}</div>`;
+    const remove=document.createElement('button');remove.type='button';remove.className='remove';remove.textContent='×';remove.setAttribute('aria-label',`移除 ${dateLabel(key)}`);remove.addEventListener('click',()=>{selectedDates.delete(key);renderDateRows();renderCalendar();invalidatePreview();});
+    row.append(title,remove);
+    if(timeMode==='different'){
+      const times=document.createElement('div');times.className='row-times';
+      for(const [field,label] of [['start','開始時間'],['end','結束時間']]){
+        const lab=document.createElement('label');lab.textContent=label;
+        const inp=document.createElement('input');inp.className='input';inp.type='time';inp.value=val[field]|| (field==='start'?'09:00':'10:00');inp.setAttribute('aria-label',`${dateLabel(key)}${label}`);
+        inp.addEventListener('input',()=>{val[field]=inp.value;val.edited=true;invalidatePreview();});lab.appendChild(inp);times.appendChild(lab);
+      }row.appendChild(times);
     }
-
-    let reminderOverride = null;
-    const remMatch = content.match(/@([\d,hHdD]+)\s*$/);
-    if(remMatch){
-      reminderOverride = remMatch[1];
-      content = content.slice(0, remMatch.index).trim();
-    }
-
-    const dtMatch = content.match(dtRe);
-
-    if(!dtMatch){
-      if(isBullet){
-        errors.push('第 ' + (idx+1) + ' 行看起來是日期項目，但無法辨識日期時間：「' + line + '」');
-        return;
-      }
-      const headerText = content.trim();
-      if(headerText.length === 0){
-        errors.push('第 ' + (idx+1) + ' 行無法辨識：「' + line + '」');
-        return;
-      }
-      currentTitle = headerText;
-      currentReminders = reminderOverride !== null ? parseReminders(reminderOverride) : defaultReminders;
-      return;
-    }
-
-    const dateStr = dtMatch[1];
-    const timeStr = dtMatch[2];
-    const before = content.slice(0, dtMatch.index);
-    const after = content.slice(dtMatch.index + dtMatch[0].length);
-    const titleRaw = (before + ' ' + after).replace(/^[\s｜|\-–—:：]+|[\s｜|\-–—:：]+$/g, '').trim();
-
-    let y, mo, da;
-    if(dateStr.indexOf('-') !== -1){
-      [y, mo, da] = dateStr.split('-').map(Number);
-    } else {
-      [mo, da] = dateStr.split('/').map(Number);
-      y = defaultYear;
-    }
-
-    let title, reminders;
-    if(isBullet){
-      if(currentTitle === null){
-        errors.push('第 ' + (idx+1) + ' 行是日期項目，但前面沒有標題行：「' + line + '」');
-        return;
-      }
-      title = currentTitle;
-      reminders = reminderOverride !== null ? parseReminders(reminderOverride) : currentReminders;
-    } else if(titleRaw.length === 0){
-      if(currentTitle === null){
-        errors.push('第 ' + (idx+1) + ' 行缺少標題，且沒有前一行標題可用：「' + line + '」');
-        return;
-      }
-      title = currentTitle;
-      reminders = reminderOverride !== null ? parseReminders(reminderOverride) : currentReminders;
-    } else {
-      title = titleRaw;
-      reminders = reminderOverride !== null ? parseReminders(reminderOverride) : defaultReminders;
-      currentTitle = null;
-    }
-
-    let start, end, allDay = false;
-    if(timeStr === '全天'){
-      allDay = true;
-      start = new Date(y, mo-1, da);
-      end = new Date(y, mo-1, da+1);
-    } else {
-      const [startStr, endStr] = timeStr.split('-');
-      const [sh, sm] = startStr.split(':').map(Number);
-      start = new Date(y, mo-1, da, sh, sm);
-      if(endStr){
-        const [eh, em] = endStr.split(':').map(Number);
-        end = new Date(y, mo-1, da, eh, em);
-      } else {
-        end = new Date(start.getTime() + defaultDuration*60000);
-      }
-    }
-
-    events.push({ title, allDay, start, end, reminders });
+    root.appendChild(row);
   });
-
-  if(errors.length > 0){
-    statusEl.innerHTML = errors.join('<br>');
-    statusEl.className = 'status-err';
-    if(events.length === 0) return;
+}
+function setTab(tab){
+  activeTab=tab;document.querySelectorAll('[data-tab]').forEach(b=>{b.classList.toggle('active',b.dataset.tab===tab);b.setAttribute('aria-selected',String(b.dataset.tab===tab));});
+  $('calendarPanel').classList.toggle('hidden',tab!=='calendar');$('textPanel').classList.toggle('hidden',tab!=='text');invalidatePreview();syncStatus();
+}
+function setTimeMode(next){
+  if(next==='different'&&timeMode!=='different')for(const value of selectedDates.values())if(!value.edited){value.start=$('commonStart').value;value.end=$('commonEnd').value;}
+  timeMode=next;document.querySelectorAll('[data-time]').forEach(b=>{b.classList.toggle('active',b.dataset.time===next);b.setAttribute('aria-pressed',String(b.dataset.time===next));});
+  $('commonTimeBlock').classList.toggle('hidden',next==='allday');
+  $('timeModeHint').textContent=next==='same'?'所有選取日期使用同一組開始、結束時間。':next==='different'?'日曆模式可在每個已選日期下修改開始與結束時間；文字模式則辨識各行時間。':'全部建立為全天行程，不需填寫時間。';
+  renderDateRows();invalidatePreview();
+}
+function renderDurationChips(){const root=$('durationChips');root.replaceChildren();durationOptions.forEach(min=>{
+  const b=document.createElement('button');b.type='button';b.className='chip'+(selectedDuration===min?' selected':'');b.textContent=min<60?min+'分鐘':(min%60===0?min/60+'小時':min/60+'小時');
+  b.addEventListener('click',()=>{selectedDuration=min;const from=timeToMin($('commonStart').value);if(from!==null)$('commonEnd').value=toTime(from+min);renderDurationChips();renderDateRows();invalidatePreview();});root.appendChild(b);
+});}
+function renderReminderChips(){const root=$('reminderChips');root.replaceChildren();reminderOptions.forEach(opt=>{
+  const b=document.createElement('button');b.type='button';b.className='chip'+(reminders.includes(opt.min)?' selected':'');b.textContent=opt.label;b.setAttribute('aria-pressed',String(reminders.includes(opt.min)));
+  b.addEventListener('click',()=>{if(reminders.includes(opt.min))reminders=reminders.filter(n=>n!==opt.min);else{if(reminders.length===2)reminders.shift();reminders.push(opt.min);}renderReminderChips();invalidatePreview();});root.appendChild(b);
+});}
+function parseReminderToken(token){const m=String(token).trim().match(/^(\d+)([dh])?$/i);if(!m)return null;const v=Number(m[1])*(m[2]?.toLowerCase()==='d'?1440:m[2]?.toLowerCase()==='h'?60:1);return Number.isSafeInteger(v)&&v>=0?v:null;}
+function parseReminderOverride(str){if(String(str).trim()==='0')return [];const parts=String(str).split(',').filter(Boolean),nums=parts.map(parseReminderToken);if(!parts.length||nums.some(n=>n===null)||nums.length>2||nums.includes(0))return null;return [...new Set(nums)];}
+function eventFromParts(title,dateKey,startTime,endTime,allDay,eventReminders){
+  const [y,mo,d]=dateKey.split('-').map(Number);
+  const startMin=timeToMin(startTime),endMin=timeToMin(endTime);
+  if(!allDay&&(startMin===null||endMin===null))return {error:'開始／結束時間格式不正確'};
+  const start=allDay?new Date(y,mo-1,d):new Date(y,mo-1,d,Math.floor(startMin/60),startMin%60);
+  const end=allDay?new Date(y,mo-1,d+1):new Date(y,mo-1,d,Math.floor(endMin/60),endMin%60);
+  if(!allDay&&end<=start)end.setDate(end.getDate()+1);
+  return {title,dateKey,start,end,allDay,reminders:[...eventReminders]};
+}
+function collectCalendar(){
+  const errors=[],out=[];const title=$('commonTitle').value.trim();const keys=sortedDates();const start=startNo();
+  if(!title)errors.push('請先輸入行程／課程名稱。');
+  if(!keys.length)errors.push('請先在日曆選擇至少一個日期。');
+  if(start===null)errors.push('起始編號必須是 1～9999 的整數。');
+  if(errors.length)return {events:[],errors};
+  keys.forEach((key,i)=>{const val=selectedDates.get(key),allDay=timeMode==='allday';const st=timeMode==='different'?val.start:$('commonStart').value;const en=timeMode==='different'?val.end:$('commonEnd').value;
+    const ev=eventFromParts(titleWithNumber(title,start+i),key,st,en,allDay,reminders);if(ev.error)errors.push(`${dateLabel(key)}：${ev.error}`);else out.push(ev);
+  });return {events:out,errors};
+}
+function parseDate(dateStr,yearState){
+  const parts=dateStr.split(/[-/]/).map(Number);const explicit=parts.length===3;
+  const month=explicit?parts[1]:parts[0],day=explicit?parts[2]:parts[1];
+  let y=explicit?parts[0]:yearState.year;
+  if(!explicit&&yearState.lastMonth!==null&&yearState.lastMonth>=10&&month<=3&&month<yearState.lastMonth)y++;
+  const test=new Date(y,month-1,day);
+  if(!Number.isInteger(y)||y<1900||y>2100||month<1||month>12||day<1||test.getFullYear()!==y||test.getMonth()!==month-1||test.getDate()!==day)return null;
+  yearState.year=y;yearState.lastMonth=month;
+  return iso(y,month,day);
+}
+function collectText(){
+  const lines=$('rawInput').value.split(/\r?\n/),errors=[],events=[];
+  const initialYear=Number($('defaultYear').value),start=startNo();
+  if(!Number.isInteger(initialYear)||initialYear<1900||initialYear>2100)errors.push('起始年份必須介於 1900～2100。');
+  if(start===null)errors.push('起始編號必須是 1～9999 的整數。');
+  if(errors.length)return {events:[],errors};
+  const yearState={year:initialYear,lastMonth:null};const fallbackTitle=$('commonTitle').value.trim();
+  let header='',headerReminders=[...reminders],groupKey='';
+  const datePattern=/((?:\d{4}[-/]\d{1,2}[-/]\d{1,2}|\d{1,2}[-/]\d{1,2}))(?!\d)/;
+  const timePattern=/(全天|\d{1,2}:\d{2}(?:\s*[-~～至]\s*\d{1,2}:\d{2})?)/;
+  lines.forEach((raw,idx)=>{
+    const line=raw.trim();if(!line)return;
+    const isBullet=/^[*•]|^[-]\s+/.test(line);let content=isBullet?line.replace(/^(?:[*•]|-\s+)\s*/,''):line;
+    let override=null;const rem=content.match(/@([\d,hHdD]+)\s*$/);
+    if(rem){override=parseReminderOverride(rem[1]);content=content.slice(0,rem.index).trim();if(override===null){errors.push(`第 ${idx+1} 行提醒格式錯誤（最多 2 個）：${line}`);return;}}
+    const match=content.match(datePattern);
+    if(!match){if(isBullet)errors.push(`第 ${idx+1} 行找不到日期：${line}`);else if(content){header=content;groupKey=`group-${idx}`;headerReminders=override??[...reminders];}return;}
+    const dateKey=parseDate(match[1],yearState);
+    if(!dateKey){errors.push(`第 ${idx+1} 行日期無效：${match[1]}`);return;}
+    const before=content.slice(0,match.index);const after=content.slice(match.index+match[0].length);
+    let rest=`${before} ${after}`.replace(/[（(](?:星期|週)?[一二三四五六日天][）)]/g,' ').trim();
+    const time=rest.match(timePattern);let allDay=timeMode==='allday';let st=$('commonStart').value,en=$('commonEnd').value;
+    if(time){rest=(rest.slice(0,time.index)+' '+rest.slice(time.index+time[0].length)).trim();
+      if(time[1]==='全天')allDay=true;
+      else if(timeMode!=='allday'){const ps=time[1].split(/\s*[-~～至]\s*/);st=ps[0];if(ps[1])en=ps[1];else{const m=timeToMin(st);if(m!==null){const duration=selectedDuration||60;en=toTime(m+duration);}}}
+    }
+    const rawTitle=rest.replace(/^[\s｜|—–:：-]+|[\s｜|—–:：-]+$/g,'').trim();
+    const title=rawTitle||header||fallbackTitle;
+    if(!title){errors.push(`第 ${idx+1} 行只有日期，請先填寫上方共用行程名稱，或加一行標題：${line}`);return;}
+    const group=rawTitle?`standalone-${rawTitle}`:(header?groupKey:`fallback-${fallbackTitle}`);
+    const alarm=override??(rawTitle?[...reminders]:header?[...headerReminders]:[...reminders]);
+    const ev=eventFromParts(title,dateKey,st,en,allDay,alarm);
+    if(ev.error){errors.push(`第 ${idx+1} 行：${ev.error}`);return;}
+    ev.group=group;ev.line=idx+1;events.push(ev);
+  });
+  if(events.length===0&&errors.length===0)errors.push('請先貼上至少一筆有效的日期行程。');
+  // Remove identical source entries before numbering so accidental duplicate dates do not advance the lesson count.
+  const seen=new Set(),unique=[];
+  events.forEach(ev=>{const key=[ev.group,ev.title,ev.dateKey,ev.start.toISOString(),ev.end.toISOString()].join('|');if(!seen.has(key)){unique.push(ev);seen.add(key);}else errors.push(`第 ${ev.line} 行與前面行程重複，請確認：${ev.title} ${ev.dateKey}`);});
+  // Split by the user's group heading. Number each series chronologically (not by input order).
+  const grouped=new Map();unique.forEach(ev=>{if(!grouped.has(ev.group))grouped.set(ev.group,[]);grouped.get(ev.group).push(ev);});
+  for(const items of grouped.values()){
+    items.sort((a,b)=>a.start-b.start||a.line-b.line);
+    if(items.length>1 || (items.length===1&&items[0].group.startsWith('group-'))){items.forEach((ev,i)=>ev.title=titleWithNumber(ev.title,start+i));}
   }
-
-  let ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//local-batch-import//zh-TW\r\nCALSCALE:GREGORIAN\r\n';
-  const now = new Date();
-  events.forEach((ev, i) => {
-    ics += 'BEGIN:VEVENT\r\n';
-    ics += 'UID:' + now.getTime() + '-' + i + '@local-batch-import\r\n';
-    ics += 'DTSTAMP:' + fmtICS(now) + '\r\n';
-    if(ev.allDay){
-      ics += 'DTSTART;VALUE=DATE:' + fmtICSDate(ev.start) + '\r\n';
-      ics += 'DTEND;VALUE=DATE:' + fmtICSDate(ev.end) + '\r\n';
-    } else {
-      ics += 'DTSTART:' + fmtICS(ev.start) + '\r\n';
-      ics += 'DTEND:' + fmtICS(ev.end) + '\r\n';
-    }
-    ics += 'SUMMARY:' + escapeText(ev.title) + '\r\n';
-    (ev.reminders || []).forEach(r => {
-      if(r > 0){
-        ics += 'BEGIN:VALARM\r\n';
-        ics += 'ACTION:DISPLAY\r\n';
-        ics += 'DESCRIPTION:' + escapeText(ev.title) + '\r\n';
-        ics += 'TRIGGER:-PT' + r + 'M\r\n';
-        ics += 'END:VALARM\r\n';
-      }
-    });
-    ics += 'END:VEVENT\r\n';
+  unique.sort((a,b)=>a.start-b.start||a.line-b.line);
+  return {events:unique,errors};
+}
+function collect(){return activeTab==='calendar'?collectCalendar():collectText();}
+const fmtd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const fmtTime=d=>`${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const alarmText=mins=>mins===0?'準時':mins%10080===0?`${mins/10080}週前`:mins%1440===0?`${mins/1440}天前`:mins%60===0?`${mins/60}小時前`:`${mins}分鐘前`;
+function showPreview(events,errors){
+  const root=$('previewList');root.replaceChildren();$('previewCount').textContent=`${events.length} 筆`;
+  $('previewSummary').textContent=events.length?`已依實際日期排序 · ${events.length} 筆行程 · ${errors.length?'請先修正下方錯誤再匯出':'可匯出行事曆檔案'}`:'';
+  if(!events.length){root.innerHTML='<div class="empty-state">尚無可匯出的行程</div>';}
+  events.forEach(ev=>{const item=document.createElement('div');item.className='preview-item';
+    const title=document.createElement('strong');title.textContent=ev.title;
+    const meta=document.createElement('div');meta.className='meta';meta.textContent=`${fmtd(ev.start)} ${ev.allDay?'全天':fmtTime(ev.start)+'–'+fmtTime(ev.end)+(fmtd(ev.start)!==fmtd(ev.end)?'（隔日結束）':'')} · ${ev.reminders.length?'提醒：'+ev.reminders.map(alarmText).join('、'):'不提醒'}`;
+    item.append(title,meta);root.appendChild(item);
   });
-  ics += 'END:VCALENDAR\r\n';
-
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  const filename = 'events.ics';
-  const file = new File([ics], filename, { type: 'text/calendar' });
-
-  async function tryShare(){
-    if(navigator.canShare && navigator.canShare({ files: [file] })){
-      try {
-        await navigator.share({ files: [file], title: filename });
-        return true;
-      } catch(e){
-        return false;
-      }
-    }
-    return false;
-  }
-
-  tryShare().then(shared => {
-    if(shared){
-      statusEl.textContent = errors.length === 0
-        ? '已開啟分享選單，請選「郵件」或「行事曆」寄出／開啟（共 ' + events.length + ' 筆行程）。'
-        : '已開啟分享選單，其餘 ' + events.length + ' 筆已成功解析。';
-      statusEl.className = 'status-ok';
-    } else {
-      if(isIOS){
-        const dataUrl = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
-        window.location.href = dataUrl;
-        statusEl.textContent = '已產生 ' + events.length + ' 筆行程，請在跳出的畫面中確認加入行事曆。';
-      } else {
-        const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        statusEl.textContent = '已下載 ' + filename + '，共 ' + events.length + ' 筆行程，點擊下載的檔案即可加入行事曆。';
-      }
-      statusEl.className = 'status-ok';
-    }
-  });
-
-  const preview = document.getElementById('preview');
-  const list = document.getElementById('list');
-  list.innerHTML = '';
-  document.getElementById('count').textContent = events.length;
-  events.forEach(ev => {
-    const row = document.createElement('div');
-    row.className = 'ev-row';
-    const dateLabel = ev.allDay
-      ? ev.start.getFullYear()+'-'+pad(ev.start.getMonth()+1)+'-'+pad(ev.start.getDate())+'（全天）'
-      : ev.start.getFullYear()+'-'+pad(ev.start.getMonth()+1)+'-'+pad(ev.start.getDate())+' '+pad(ev.start.getHours())+':'+pad(ev.start.getMinutes())+'-'+pad(ev.end.getHours())+':'+pad(ev.end.getMinutes());
-    const remLabel = (ev.reminders && ev.reminders.length > 0)
-      ? ev.reminders.map(r => r % 1440 === 0 ? (r/1440)+'天前' : (r % 60 === 0 ? (r/60)+'小時前' : r+'分鐘前')).join('、')
-      : '無提醒';
-    row.innerHTML = '<div class="ev-title">'+ev.title+'</div><div class="ev-meta">'+dateLabel+' · 提醒：'+remLabel+'</div>';
-    list.appendChild(row);
-  });
-  preview.style.display = 'block';
-});
+}
+function icalDate(d){return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`;}
+function icalFloating(d){return `${icalDate(d)}T${pad(d.getHours())}${pad(d.getMinutes())}00`;}
+function icalStamp(d){return `${d.getUTCFullYear()}${pad(d.getUTCMonth()+1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}Z`;}
+function escapeIcal(s){return String(s).replace(/\\/g,'\\\\').replace(/\r?\n/g,'\\n').replace(/;/g,'\\;').replace(/,/g,'\\,');}
+// RFC 5545 folds content lines at 75 UTF-8 octets; never split a Unicode code point.
+function fold(line){const enc=new TextEncoder();const parts=[];let segment='',bytes=0;
+  for(const char of line){const len=enc.encode(char).length;if(bytes+len>73){parts.push(segment);segment=' ';bytes=1;}segment+=char;bytes+=len;}parts.push(segment);return parts.join('\r\n');
+}
+function makeICS(events){
+  const stamp=icalStamp(new Date()),seed=`${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//importcalender v2.0//zh-TW','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+  events.forEach((ev,i)=>{
+    lines.push('BEGIN:VEVENT',`UID:${seed}-${i}@importcalender.local`,`DTSTAMP:${stamp}`);
+    if(ev.allDay){lines.push(`DTSTART;VALUE=DATE:${icalDate(ev.start)}`,`DTEND;VALUE=DATE:${icalDate(ev.end)}`);}
+    else{lines.push(`DTSTART:${icalFloating(ev.start)}`,`DTEND:${icalFloating(ev.end)}`);}
+    lines.push(`SUMMARY:${escapeIcal(ev.title)}`);
+    ev.reminders.forEach(min=>{lines.push('BEGIN:VALARM','ACTION:DISPLAY',`DESCRIPTION:${escapeIcal(ev.title)}`,min===0?'TRIGGER:PT0S':`TRIGGER:-PT${min}M`,'END:VALARM');});
+    lines.push('END:VEVENT');
+  });lines.push('END:VCALENDAR');return lines.map(fold).join('\r\n')+'\r\n';
+}
+async function downloadICS(events){
+  const contents=makeICS(events),filename='calendar-events.ics';
+  const file=new File([contents],filename,{type:'text/calendar'});
+  try{
+    if(navigator.canShare?.({files:[file]}) && navigator.share){await navigator.share({files:[file],title:'批次行程'});syncStatus(`已開啟分享選單，共 ${events.length} 筆。若要加入 iPhone 行事曆，建議透過「郵件」開啟附件。`,'ok');return;}
+  }catch(err){if(err?.name==='AbortError'){syncStatus('已取消分享；未匯入行事曆。','warn');return;} }
+  const blob=new Blob([contents],{type:'text/calendar;charset=utf-8'});const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
+  syncStatus(`已產生 ${events.length} 筆行程的 ${filename}。在 iPhone「檔案」中若無法直接匯入，請改由郵件附件開啟。`,'ok');
+}
+function run(shouldExport){
+  const {events,errors}=collect();showPreview(events,errors);
+  if(errors.length){syncStatus(errors.join('\n'),'err');return;}
+  if(!events.length){syncStatus('沒有可匯出的行程，請先選日期或貼上文字。','err');return;}
+  syncStatus(`已檢查 ${events.length} 筆行程，請確認標題與時間。`,'ok');
+  if(shouldExport)downloadICS(events);
+}
+$('prevMonth').addEventListener('click',()=>yearMonthChange(-1));
+$('nextMonth').addEventListener('click',()=>yearMonthChange(1));
+$('todayMonth').addEventListener('click',()=>{viewYear=now.getFullYear();viewMonth=now.getMonth();renderCalendar();});
+$('clearDates').addEventListener('click',()=>{if(selectedDates.size&&confirm('確定清除所有已選日期？')){selectedDates.clear();renderCalendar();renderDateRows();invalidatePreview();}});
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+document.querySelectorAll('[data-time]').forEach(b=>b.addEventListener('click',()=>setTimeMode(b.dataset.time)));
+$('numberingEnabled').addEventListener('change',()=>{$('numberOptions').classList.toggle('hidden',!$('numberingEnabled').checked);renderDateRows();invalidatePreview();});
+['numberStyle','numberStart','commonTitle'].forEach(id=>$(id).addEventListener('input',()=>{renderDateRows();invalidatePreview();}));
+$('commonStart').addEventListener('input',()=>{selectedDuration=null;renderDurationChips();renderDateRows();invalidatePreview();});
+$('commonEnd').addEventListener('input',()=>{selectedDuration=null;renderDurationChips();renderDateRows();invalidatePreview();});
+['rawInput','defaultYear'].forEach(id=>$(id).addEventListener('input',invalidatePreview));
+$('previewBtn').addEventListener('click',()=>run(false));
+$('exportBtn').addEventListener('click',()=>run(true));
+renderCalendar();renderDateRows();renderDurationChips();renderReminderChips();
+})();
 </script>
 </body>
 </html>
