@@ -33,12 +33,19 @@ textarea{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-s
 .time-picker input[type="time"]{position:absolute;top:0;left:0;right:0;bottom:0;display:block;margin:0;padding:0;width:100%;max-width:100%;min-width:0;height:100%;min-height:0;box-sizing:border-box;border:0;opacity:0;cursor:pointer;z-index:1;-webkit-appearance:none;appearance:none}
 .date-row .time-picker{height:40px}
 .date-row .time-visible{font-size:14px}
+/* Text schedule for messaging apps; readable and selectable on iPhone. */
+.share-text{display:block;width:100%;min-width:0;max-width:100%;height:auto;min-height:196px;resize:vertical;margin-top:13px;background:#fbfcfe;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;font-size:13.5px;line-height:1.72;white-space:pre-wrap;-webkit-overflow-scrolling:touch}
+.share-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:11px}
+.share-actions .btn{width:100%;min-width:0;font-size:14px;padding:11px 8px}
+.share-status{font-size:12px;line-height:1.5;min-height:18px;margin:8px 0 0;color:var(--muted)}
+.share-status.ok{color:var(--green)}.share-status.err{color:var(--red)}
+@media(max-width:360px){.share-actions{gap:8px}.share-actions .btn{padding:10px 6px}}
 </style>
 </head>
 <body>
 <main class="wrap">
 <header class="top">
-  <div class="eyebrow">APPLE CALENDAR · 批次建立 <span class="version">v2.0.2</span></div>
+  <div class="eyebrow">APPLE CALENDAR · 批次建立 <span class="version">v2.0.3</span></div>
   <h1>行程批次匯入 Apple 行事曆</h1>
   <p class="subtitle">選日期、安排時間、自動編堂次，一次產生 .ics 行程。完全在瀏覽器離線處理，不會上傳資料。</p>
 </header>
@@ -109,9 +116,20 @@ textarea{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-s
       <div id="previewList" class="preview-list"><div class="empty-state">選擇日期或輸入行程後，點選「檢查預覽」</div></div>
       <p class="preview-summary" id="previewSummary"></p>
     </section>
+    <section class="card" id="sharePanel" aria-labelledby="shareHeading">
+      <h2 id="shareHeading">文字版行程總覽</h2>
+      <p class="hint">依日期自動整理完整年月日、星期、時間和編號。可直接複製貼到 LINE、訊息或其他地方；不包含個人的提醒設定。</p>
+      <label class="visually-hidden" for="shareText">可複製的行程文字</label>
+      <textarea class="input share-text" id="shareText" readonly rows="8" spellcheck="false" placeholder="選取日期並填寫行程名稱後，這裡就會自動產生可分享的文字。"></textarea>
+      <div class="share-actions">
+        <button type="button" id="copySummary" class="btn primary" disabled>複製全部文字</button>
+        <button type="button" id="shareSummary" class="btn secondary" disabled>分享文字</button>
+      </div>
+      <p id="shareStatus" class="share-status" role="status" aria-live="polite">尚無可分享行程。</p>
+    </section>
   </div>
 </div>
-<p class="footer">行程批次匯入 Apple 行事曆 · v2.0.2 · 無需登入、無外部套件、資料不會上傳</p>
+<p class="footer">行程批次匯入 Apple 行事曆 · v2.0.3 · 無需登入、無外部套件、資料不會上傳</p>
 </main>
 <script>
 (() => {
@@ -164,7 +182,7 @@ function timePicker(input){
   return wrap;
 }
 function syncStatus(message='',cls=''){$('status').textContent=message;$('status').className=cls;}
-function invalidatePreview(){ $('previewCount').textContent='尚未更新'; $('previewSummary').textContent='設定已變更，請重新檢查預覽。'; }
+function invalidatePreview(){ $('previewCount').textContent='尚未更新'; $('previewSummary').textContent='設定已變更，請重新檢查預覽。'; refreshShareText(); }
 function yearMonthChange(delta){ const d=new Date(viewYear,viewMonth+delta,1);viewYear=d.getFullYear();viewMonth=d.getMonth();renderCalendar(); }
 function renderCalendar(){
   $('monthLabel').textContent=`${viewYear} 年 ${viewMonth+1} 月`;
@@ -309,6 +327,66 @@ function collectText(){
   return {events:unique,errors};
 }
 function collect(){return activeTab==='calendar'?collectCalendar():collectText();}
+// Share text is built from the same validated events used by the .ics export.
+// Never copy a stale or partial schedule when the form contains an error.
+function formatShareText(events){
+  const lines=[`【行程總覽｜共 ${events.length} 筆】`];
+  events.forEach((ev,i)=>{
+    const when=`${dateLabel(ev.dateKey)} ${ev.allDay?'全天':fmtTime(ev.start)+'–'+fmtTime(ev.end)+(fmtd(ev.start)!==fmtd(ev.end)?'（隔日結束）':'')}`;
+    lines.push(`${i+1}. ${when}｜${ev.title}`);
+  });
+  return lines.join('\n');
+}
+function refreshShareText(){
+  const {events,errors}=collect();
+  const ready=events.length>0&&errors.length===0;
+  $('shareText').value=ready?formatShareText(events):'';
+  $('copySummary').disabled=!ready;
+  $('shareSummary').disabled=!ready;
+  $('shareStatus').textContent=ready?`已整理 ${events.length} 筆行程，可複製或分享。`:errors.length&&events.length?'請先修正行程錯誤，才能分享完整內容。':'尚無可分享行程。';
+  $('shareStatus').className='share-status';
+}
+async function copyShareText(){
+  const content=$('shareText').value;
+  if(!content)return false;
+  try{
+    if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(content);}
+    else throw new Error('clipboard-unavailable');
+  }catch(err){
+    // execCommand is still useful for local file previews and some iOS versions.
+    try{
+      const box=$('shareText');box.focus();box.select();box.setSelectionRange(0,box.value.length);
+      if(!document.execCommand('copy'))throw new Error('copy-failed');
+    }catch(e){
+      $('shareStatus').textContent='無法自動複製，請長按上方文字選取並複製。';
+      $('shareStatus').className='share-status err';
+      return false;
+    }
+  }
+  $('shareStatus').textContent='已複製完整行程文字，可以貼到 LINE 或其他地方。';
+  $('shareStatus').className='share-status ok';
+  return true;
+}
+async function shareScheduleText(){
+  const content=$('shareText').value;
+  if(!content)return;
+  if(navigator.share){
+    try{
+      await navigator.share({title:'行程總覽',text:content});
+      $('shareStatus').textContent='已開啟分享並完成操作。';
+      $('shareStatus').className='share-status ok';
+      return;
+    }catch(err){
+      if(err?.name==='AbortError'){
+        $('shareStatus').textContent='已取消分享，文字仍保留在上方。';
+        $('shareStatus').className='share-status';
+        return;
+      }
+    }
+  }
+  const copied=await copyShareText();
+  if(copied)$('shareStatus').textContent='此瀏覽器無法直接分享文字，已改為複製；可以貼到 LINE 或其他地方。';
+}
 const fmtd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const fmtTime=d=>`${pad(d.getHours())}:${pad(d.getMinutes())}`;
 const alarmText=mins=>mins===0?'準時':mins%10080===0?`${mins/10080}週前`:mins%1440===0?`${mins/1440}天前`:mins%60===0?`${mins/60}小時前`:`${mins}分鐘前`;
@@ -332,7 +410,7 @@ function fold(line){const enc=new TextEncoder();const parts=[];let segment='',by
 }
 function makeICS(events){
   const stamp=icalStamp(new Date()),seed=`${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//importcalender v2.0.2//zh-TW','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//importcalender v2.0.3//zh-TW','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
   events.forEach((ev,i)=>{
     lines.push('BEGIN:VEVENT',`UID:${seed}-${i}@importcalender.local`,`DTSTAMP:${stamp}`);
     if(ev.allDay){lines.push(`DTSTART;VALUE=DATE:${icalDate(ev.start)}`,`DTEND;VALUE=DATE:${icalDate(ev.end)}`);}
@@ -353,7 +431,7 @@ async function downloadICS(events){
   syncStatus(`已產生 ${events.length} 筆行程的 ${filename}。在 iPhone「檔案」中若無法直接匯入，請改由郵件附件開啟。`,'ok');
 }
 function run(shouldExport){
-  const {events,errors}=collect();showPreview(events,errors);
+  const {events,errors}=collect();showPreview(events,errors);refreshShareText();
   if(errors.length){syncStatus(errors.join('\n'),'err');return;}
   if(!events.length){syncStatus('沒有可匯出的行程，請先選日期或貼上文字。','err');return;}
   syncStatus(`已檢查 ${events.length} 筆行程，請確認標題與時間。`,'ok');
@@ -374,7 +452,9 @@ window.addEventListener('pageshow',()=>document.querySelectorAll('.time-picker i
 ['rawInput','defaultYear'].forEach(id=>$(id).addEventListener('input',invalidatePreview));
 $('previewBtn').addEventListener('click',()=>run(false));
 $('exportBtn').addEventListener('click',()=>run(true));
-renderCalendar();renderDateRows();renderDurationChips();renderReminderChips();
+$('copySummary').addEventListener('click',copyShareText);
+$('shareSummary').addEventListener('click',shareScheduleText);
+renderCalendar();renderDateRows();renderDurationChips();renderReminderChips();refreshShareText();
 })();
 </script>
 </body>
