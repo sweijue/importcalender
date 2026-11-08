@@ -40,12 +40,16 @@ textarea{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-s
 .share-status{font-size:12px;line-height:1.5;min-height:18px;margin:8px 0 0;color:var(--muted)}
 .share-status.ok{color:var(--green)}.share-status.err{color:var(--red)}
 @media(max-width:360px){.share-actions{gap:8px}.share-actions .btn{padding:10px 6px}}
+.draft-controls{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:-4px 0 15px;padding:10px 12px;background:#edf3fb;border:1px solid #dfebf8;border-radius:11px;color:#526275;font-size:12px}
+.draft-controls .tinybtn{background:#fff;flex-shrink:0}
+.share-format{margin-top:12px}.share-format .input{font-size:13.5px;min-height:40px}
+@media(max-width:480px){.draft-controls{align-items:flex-start;flex-direction:column}.draft-controls .tinybtn{align-self:flex-end}}
 </style>
 </head>
 <body>
 <main class="wrap">
 <header class="top">
-  <div class="eyebrow">APPLE CALENDAR · 批次建立 <span class="version">v2.0.3</span></div>
+  <div class="eyebrow">APPLE CALENDAR · 批次建立 <span class="version">v2.0.4</span></div>
   <h1>行程批次匯入 Apple 行事曆</h1>
   <p class="subtitle">選日期、安排時間、自動編堂次，一次產生 .ics 行程。完全在瀏覽器離線處理，不會上傳資料。</p>
 </header>
@@ -53,6 +57,7 @@ textarea{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-s
   <button type="button" role="tab" aria-selected="true" class="active" data-tab="calendar">日曆挑日期</button>
   <button type="button" role="tab" aria-selected="false" data-tab="text">貼上行程文字</button>
 </div>
+<div class="draft-controls"><span id="draftHint">會記住上次的設定及尚未完成的行程，只儲存在這個瀏覽器。</span><button type="button" class="tinybtn" id="newSchedule">開始新行程（保留設定）</button></div>
 <section class="card" aria-label="共同設定">
   <div class="fields">
     <div class="field"><label class="label" for="commonTitle">行程／課程名稱</label><input id="commonTitle" class="input" type="text" placeholder="例如：瑜伽課、韓文課、健身課" maxlength="180" autocomplete="off"></div>
@@ -118,7 +123,8 @@ textarea{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-s
     </section>
     <section class="card" id="sharePanel" aria-labelledby="shareHeading">
       <h2 id="shareHeading">文字版行程總覽</h2>
-      <p class="hint">依日期自動整理完整年月日、星期、時間和編號。可直接複製貼到 LINE、訊息或其他地方；不包含個人的提醒設定。</p>
+      <p class="hint">LINE 版會把年份、日期和時間分開排列，避免文字擠在同一行；不包含個人的提醒設定。</p>
+      <div class="share-format"><label class="label" for="shareFormat">文字排列方式</label><select id="shareFormat" class="input"><option value="compact">LINE 精簡版（推薦）</option><option value="detailed">逐筆詳細版</option></select></div>
       <label class="visually-hidden" for="shareText">可複製的行程文字</label>
       <textarea class="input share-text" id="shareText" readonly rows="8" spellcheck="false" placeholder="選取日期並填寫行程名稱後，這裡就會自動產生可分享的文字。"></textarea>
       <div class="share-actions">
@@ -129,7 +135,7 @@ textarea{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-s
     </section>
   </div>
 </div>
-<p class="footer">行程批次匯入 Apple 行事曆 · v2.0.3 · 無需登入、無外部套件、資料不會上傳</p>
+<p class="footer">行程批次匯入 Apple 行事曆 · v2.0.4 · 無需登入、無外部套件、資料不會上傳</p>
 </main>
 <script>
 (() => {
@@ -144,7 +150,7 @@ let viewYear = now.getFullYear(), viewMonth = now.getMonth();
 let activeTab = 'calendar', timeMode = 'same', reminders = [60,1440], selectedDuration = 60;
 const durationOptions = [15,30,45,60,90,120,180];
 const reminderOptions = [{min:0,label:'準時'}, {min:5,label:'5分鐘前'}, {min:10,label:'10分鐘前'}, {min:15,label:'15分鐘前'}, {min:30,label:'30分鐘前'}, {min:60,label:'1小時前'}, {min:120,label:'2小時前'}, {min:1440,label:'1天前'}, {min:2880,label:'2天前'}, {min:10080,label:'1週前'}];
-// Save only reminder preferences, not the user's private calendar dates or event titles.
+// Keep the previous reminder key for migration from v2.0.3; all preferences and the editable draft now have a separate local key.
 const REMINDER_STORAGE_KEY = 'importcalender-reminders-v1';
 function restoreReminderPreferences(){
   try{
@@ -163,6 +169,69 @@ function saveReminderPreferences(){
 }
 restoreReminderPreferences();
 $('defaultYear').value = String(now.getFullYear());
+const STATE_STORAGE_KEY = 'importcalender-state-v2';
+const allowedReminders = new Set(reminderOptions.map(opt => opt.min));
+const validTime = value => typeof value==='string' && timeToMinutesForStorage(value);
+function timeToMinutesForStorage(value){
+  const match=String(value).match(/^(?:[01]\d|2[0-3]):[0-5]\d$/);
+  return Boolean(match);
+}
+function validDateKey(key){
+  if(typeof key!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(key))return false;
+  const [y,m,d]=key.split('-').map(Number);
+  const actual=new Date(y,m-1,d);
+  return y>=1900&&y<=2100&&actual.getFullYear()===y&&actual.getMonth()===m-1&&actual.getDate()===d;
+}
+function saveState(){
+  const state={version:2,settings:{
+    activeTab,timeMode,reminders:[...reminders],selectedDuration,
+    commonStart:$('commonStart').value,commonEnd:$('commonEnd').value,
+    numberingEnabled:$('numberingEnabled').checked,numberStyle:$('numberStyle').value,
+    numberStart:$('numberStart').value,defaultYear:$('defaultYear').value,
+    shareFormat:$('shareFormat').value,viewYear,viewMonth
+  },draft:{
+    title:$('commonTitle').value,rawInput:$('rawInput').value,
+    selectedDates:[...selectedDates].map(([key,v])=>[key,{start:v.start,end:v.end,edited:Boolean(v.edited)}])
+  }};
+  try{localStorage.setItem(STATE_STORAGE_KEY,JSON.stringify(state));}
+  catch(e){$('draftHint').textContent='此瀏覽器無法儲存設定，請避免關閉或重新整理頁面。';}
+}
+function restoreState(){
+  let state;
+  try{state=JSON.parse(localStorage.getItem(STATE_STORAGE_KEY)||'null');}
+  catch(e){return false;}
+  if(!state||state.version!==2||typeof state.settings!=='object'||!state.settings)return false;
+  const v=state.settings, draft=state.draft||{};
+  if(['calendar','text'].includes(v.activeTab))activeTab=v.activeTab;
+  if(['same','different','allday'].includes(v.timeMode))timeMode=v.timeMode;
+  if(Array.isArray(v.reminders)&&v.reminders.length<=2&&v.reminders.every(n=>Number.isInteger(n)&&allowedReminders.has(n))&&new Set(v.reminders).size===v.reminders.length)reminders=[...v.reminders];
+  if(v.selectedDuration===null||durationOptions.includes(v.selectedDuration))selectedDuration=v.selectedDuration;
+  if(validTime(v.commonStart))$('commonStart').value=v.commonStart;
+  if(validTime(v.commonEnd))$('commonEnd').value=v.commonEnd;
+  if(typeof v.numberingEnabled==='boolean')$('numberingEnabled').checked=v.numberingEnabled;
+  if(['lesson','time','number'].includes(v.numberStyle))$('numberStyle').value=v.numberStyle;
+  if(Number.isInteger(Number(v.numberStart))&&Number(v.numberStart)>=1&&Number(v.numberStart)<=9999)$('numberStart').value=String(v.numberStart);
+  if(Number.isInteger(Number(v.defaultYear))&&Number(v.defaultYear)>=1900&&Number(v.defaultYear)<=2100)$('defaultYear').value=String(v.defaultYear);
+  if(['compact','detailed'].includes(v.shareFormat))$('shareFormat').value=v.shareFormat;
+  if(Number.isInteger(v.viewYear)&&v.viewYear>=1900&&v.viewYear<=2100&&Number.isInteger(v.viewMonth)&&v.viewMonth>=0&&v.viewMonth<=11){viewYear=v.viewYear;viewMonth=v.viewMonth;}
+  if(typeof draft.title==='string')$('commonTitle').value=draft.title.slice(0,180);
+  if(typeof draft.rawInput==='string')$('rawInput').value=draft.rawInput.slice(0,200000);
+  if(Array.isArray(draft.selectedDates)){
+    for(const entry of draft.selectedDates.slice(0,1000)){
+      if(!Array.isArray(entry)||entry.length!==2||!validDateKey(entry[0]))continue;
+      const vv=entry[1]||{};
+      selectedDates.set(entry[0],{
+        start:validTime(vv.start)?vv.start:$('commonStart').value,
+        end:validTime(vv.end)?vv.end:$('commonEnd').value,
+        edited:Boolean(vv.edited)
+      });
+    }
+  }
+  $('draftHint').textContent='已還原上次使用的設定與行程草稿（僅儲存在這個瀏覽器）。';
+  return true;
+}
+restoreState();
+$('numberOptions').classList.toggle('hidden',!$('numberingEnabled').checked);
 const sortedDates = () => [...selectedDates.keys()].sort();
 const escapeHTML = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dateLabel = key => { const [y,m,d] = key.split('-').map(Number); const dow='日一二三四五六'[new Date(y,m-1,d).getDay()]; return `${y}/${pad(m)}/${pad(d)}（${dow}）`; };
@@ -329,13 +398,46 @@ function collectText(){
 function collect(){return activeTab==='calendar'?collectCalendar():collectText();}
 // Share text is built from the same validated events used by the .ics export.
 // Never copy a stale or partial schedule when the form contains an error.
+function shareNameParts(title){
+  const hit=String(title).match(/^(.*?)\s*[｜|]\s*(第\s*\d+\s*[堂次]|#\d+)$/);
+  return hit?{base:hit[1].trim(),serial:hit[2].replace(/\s+/g,'')}:{base:String(title).trim(),serial:''};
+}
+function shareWhen(ev){
+  if(ev.allDay)return '全天';
+  return `${fmtTime(ev.start)}–${fmtTime(ev.end)}${fmtd(ev.start)!==fmtd(ev.end)?'（隔日結束）':''}`;
+}
+function shareDateParts(key){
+  const [y,m,d]=key.split('-').map(Number);
+  return {year:y,short:`${m}月${d}日（${'日一二三四五六'[new Date(y,m-1,d).getDay()]}）`};
+}
+// Keep dates short in LINE: year headings, Chinese month/day, time on a separate row when needed.
+// This avoids LINE joining an ISO date + a time into a long blue link that wraps badly.
 function formatShareText(events){
-  const lines=[`【行程總覽｜共 ${events.length} 筆】`];
+  const parts=events.map(ev=>shareNameParts(ev.title));
+  const commonBase=parts.every(item=>item.base===parts[0].base)?parts[0].base:null;
+  const allLesson=parts.every(p=>/第\d+堂$/.test(p.serial));
+  const allTimes=parts.every(p=>/第\d+次$/.test(p.serial));
+  const unit=allLesson?'堂':allTimes?'次':'筆';
+  const lines=[`【${commonBase||'行程總覽'}｜共 ${events.length} ${unit}】`];
+  const times=events.map(shareWhen);
+  const sameTime=times.every(t=>t===times[0]);
+  if(sameTime)lines.push(`時間：${times[0]}`);
+  const detailed=$('shareFormat').value==='detailed';
+  let lastYear=null;
   events.forEach((ev,i)=>{
-    const when=`${dateLabel(ev.dateKey)} ${ev.allDay?'全天':fmtTime(ev.start)+'–'+fmtTime(ev.end)+(fmtd(ev.start)!==fmtd(ev.end)?'（隔日結束）':'')}`;
-    lines.push(`${i+1}. ${when}｜${ev.title}`);
+    const {year,short}=shareDateParts(ev.dateKey);
+    if(year!==lastYear){lines.push('',`【${year} 年】`);lastYear=year;}
+    const name=commonBase?parts[i].serial:ev.title;
+    if(detailed){
+      lines.push(`${i+1}. ${name||'行程'} · ${short}`);
+      if(!sameTime)lines.push(`   時間：${times[i]}`);
+      lines.push('');
+    }else{
+      lines.push(`${i+1}. ${short}${name?'｜'+name:''}`);
+      if(!sameTime)lines.push(`   ${times[i]}`);
+    }
   });
-  return lines.join('\n');
+  return lines.join('\n').trimEnd();
 }
 function refreshShareText(){
   const {events,errors}=collect();
@@ -410,7 +512,7 @@ function fold(line){const enc=new TextEncoder();const parts=[];let segment='',by
 }
 function makeICS(events){
   const stamp=icalStamp(new Date()),seed=`${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//importcalender v2.0.3//zh-TW','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//importcalender v2.0.4//zh-TW','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
   events.forEach((ev,i)=>{
     lines.push('BEGIN:VEVENT',`UID:${seed}-${i}@importcalender.local`,`DTSTAMP:${stamp}`);
     if(ev.allDay){lines.push(`DTSTART;VALUE=DATE:${icalDate(ev.start)}`,`DTEND;VALUE=DATE:${icalDate(ev.end)}`);}
@@ -454,7 +556,28 @@ $('previewBtn').addEventListener('click',()=>run(false));
 $('exportBtn').addEventListener('click',()=>run(true));
 $('copySummary').addEventListener('click',copyShareText);
 $('shareSummary').addEventListener('click',shareScheduleText);
+$('shareFormat').addEventListener('change',refreshShareText);
+$('newSchedule').addEventListener('click',()=>{
+  if(!confirm('確定清除目前行程的名稱、日期及貼上的文字？時間、提醒、編號等設定會保留。'))return;
+  selectedDates.clear();$('commonTitle').value='';$('rawInput').value='';
+  viewYear=now.getFullYear();viewMonth=now.getMonth();
+  renderCalendar();renderDateRows();showPreview([],[]);invalidatePreview();syncStatus('已開始新行程；先前偏好設定已保留。','ok');saveState();
+});
+// Centralized save-after-edit captures native time changes and per-date edits,
+// as well as controls that update state through their own click handlers.
+document.addEventListener('input',event=>{
+  if(event.target.closest('#sharePanel')&&event.target.id==='shareText')return;
+  if(event.target.matches('input,select,textarea'))saveState();
+});
+document.addEventListener('change',event=>{
+  if(event.target.matches('input,select,textarea'))saveState();
+});
+document.addEventListener('click',event=>{
+  if(event.target.closest('[data-tab],[data-time],#calendarDays button,#selectedDates .remove,#durationChips button,#reminderChips button,#prevMonth,#nextMonth,#todayMonth,#clearDates'))saveState();
+});
+setTab(activeTab);setTimeMode(timeMode);
 renderCalendar();renderDateRows();renderDurationChips();renderReminderChips();refreshShareText();
+document.querySelectorAll('.time-picker input[type=time]').forEach(syncTimeVisible);
 })();
 </script>
 </body>
