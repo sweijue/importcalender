@@ -49,7 +49,7 @@ textarea{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-s
 <body>
 <main class="wrap">
 <header class="top">
-  <div class="eyebrow">APPLE CALENDAR · 批次建立 <span class="version">v2.0.4</span></div>
+  <div class="eyebrow">APPLE CALENDAR · 批次建立 <span class="version">v2.0.7</span></div>
   <h1>行程批次匯入 Apple 行事曆</h1>
   <p class="subtitle">選日期、安排時間、自動編堂次，一次產生 .ics 行程。完全在瀏覽器離線處理，不會上傳資料。</p>
 </header>
@@ -123,8 +123,8 @@ textarea{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-s
     </section>
     <section class="card" id="sharePanel" aria-labelledby="shareHeading">
       <h2 id="shareHeading">文字版行程總覽</h2>
-      <p class="hint">LINE 版會把年份、日期和時間分開排列，避免文字擠在同一行；不包含個人的提醒設定。</p>
-      <div class="share-format"><label class="label" for="shareFormat">文字排列方式</label><select id="shareFormat" class="input"><option value="compact">LINE 精簡版（推薦）</option><option value="detailed">逐筆詳細版</option></select></div>
+      <p class="hint">兩種分享格式：逐筆完整日期或依年份分組（同一年也一定顯示年份）。時間相同只列一次，不同時間會緊接在各堂後面；不包含私人提醒。</p>
+      <div class="share-format"><label class="label" for="shareFormat">文字排列方式</label><select id="shareFormat" class="input"><option value="grouped">依年份分組（每年列一次）</option><option value="full">逐筆完整日期（每筆含年份）</option></select></div>
       <label class="visually-hidden" for="shareText">可複製的行程文字</label>
       <textarea class="input share-text" id="shareText" readonly rows="8" spellcheck="false" placeholder="選取日期並填寫行程名稱後，這裡就會自動產生可分享的文字。"></textarea>
       <div class="share-actions">
@@ -135,7 +135,7 @@ textarea{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-s
     </section>
   </div>
 </div>
-<p class="footer">行程批次匯入 Apple 行事曆 · v2.0.4 · 無需登入、無外部套件、資料不會上傳</p>
+<p class="footer">行程批次匯入 Apple 行事曆 · v2.0.7 · 無需登入、無外部套件、資料不會上傳</p>
 </main>
 <script>
 (() => {
@@ -212,7 +212,7 @@ function restoreState(){
   if(['lesson','time','number'].includes(v.numberStyle))$('numberStyle').value=v.numberStyle;
   if(Number.isInteger(Number(v.numberStart))&&Number(v.numberStart)>=1&&Number(v.numberStart)<=9999)$('numberStart').value=String(v.numberStart);
   if(Number.isInteger(Number(v.defaultYear))&&Number(v.defaultYear)>=1900&&Number(v.defaultYear)<=2100)$('defaultYear').value=String(v.defaultYear);
-  if(['compact','detailed'].includes(v.shareFormat))$('shareFormat').value=v.shareFormat;
+  if(['compact','detailed','grouped','full'].includes(v.shareFormat))$('shareFormat').value=({compact:'grouped',detailed:'full'}[v.shareFormat]||v.shareFormat);
   if(Number.isInteger(v.viewYear)&&v.viewYear>=1900&&v.viewYear<=2100&&Number.isInteger(v.viewMonth)&&v.viewMonth>=0&&v.viewMonth<=11){viewYear=v.viewYear;viewMonth=v.viewMonth;}
   if(typeof draft.title==='string')$('commonTitle').value=draft.title.slice(0,180);
   if(typeof draft.rawInput==='string')$('rawInput').value=draft.rawInput.slice(0,200000);
@@ -408,10 +408,13 @@ function shareWhen(ev){
 }
 function shareDateParts(key){
   const [y,m,d]=key.split('-').map(Number);
-  return {year:y,short:`${m}月${d}日（${'日一二三四五六'[new Date(y,m-1,d).getDay()]}）`};
+  const weekday='日一二三四五六'[new Date(y,m-1,d).getDay()];
+  return {year:y,short:`${pad(m)}/${pad(d)}（${weekday}）`,full:`${y}/${pad(m)}/${pad(d)}（${weekday}）`};
 }
-// Keep dates short in LINE: year headings, Chinese month/day, time on a separate row when needed.
-// This avoids LINE joining an ISO date + a time into a long blue link that wraps badly.
+// The two formats intentionally differ: every item has a full date, or dates
+// are grouped beneath year headings (which are mandatory even for one year).
+// If all schedules share their time, state it once; otherwise put the time on
+// the SAME line as each item, keeping LINE messages compact.
 function formatShareText(events){
   const parts=events.map(ev=>shareNameParts(ev.title));
   const commonBase=parts.every(item=>item.base===parts[0].base)?parts[0].base:null;
@@ -422,20 +425,20 @@ function formatShareText(events){
   const times=events.map(shareWhen);
   const sameTime=times.every(t=>t===times[0]);
   if(sameTime)lines.push(`時間：${times[0]}`);
-  const detailed=$('shareFormat').value==='detailed';
+  const grouped=$('shareFormat').value==='grouped';
   let lastYear=null;
+  if(!grouped)lines.push('');
   events.forEach((ev,i)=>{
-    const {year,short}=shareDateParts(ev.dateKey);
-    if(year!==lastYear){lines.push('',`【${year} 年】`);lastYear=year;}
-    const name=commonBase?parts[i].serial:ev.title;
-    if(detailed){
-      lines.push(`${i+1}. ${name||'行程'} · ${short}`);
-      if(!sameTime)lines.push(`   時間：${times[i]}`);
-      lines.push('');
-    }else{
-      lines.push(`${i+1}. ${short}${name?'｜'+name:''}`);
-      if(!sameTime)lines.push(`   ${times[i]}`);
+    const {year,short,full}=shareDateParts(ev.dateKey);
+    if(grouped && year!==lastYear){
+      lines.push('',`【${year} 年】`);
+      lastYear=year;
     }
+    // Prefer the ordinal label first, as approved for LINE sharing.
+    const label=commonBase?parts[i].serial:ev.title;
+    const date=grouped?short:full;
+    const timeSuffix=sameTime?'':`｜${times[i]}`;
+    lines.push(`${i+1}. ${label?label+'｜':''}${date}${timeSuffix}`);
   });
   return lines.join('\n').trimEnd();
 }
@@ -512,7 +515,7 @@ function fold(line){const enc=new TextEncoder();const parts=[];let segment='',by
 }
 function makeICS(events){
   const stamp=icalStamp(new Date()),seed=`${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//importcalender v2.0.4//zh-TW','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//importcalender v2.0.7//zh-TW','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
   events.forEach((ev,i)=>{
     lines.push('BEGIN:VEVENT',`UID:${seed}-${i}@importcalender.local`,`DTSTAMP:${stamp}`);
     if(ev.allDay){lines.push(`DTSTART;VALUE=DATE:${icalDate(ev.start)}`,`DTEND;VALUE=DATE:${icalDate(ev.end)}`);}
